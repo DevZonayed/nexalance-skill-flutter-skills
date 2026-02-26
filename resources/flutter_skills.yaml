@@ -6,7 +6,7 @@
 # To generate skills, use the following command (from the `tool` directory):
 # dart run skills generate-skill --config ../resources/flutter_skills.yaml --output ../skills
 
-- name: environment-setup-macos
+- name: flutter-environment-setup-macos
   description: Set up a macOS environment for Flutter development
   instructions: |
     To set up a macOS environment for Flutter development, you need to configure your development
@@ -42,7 +42,67 @@
     - https://docs.flutter.dev/platform-integration/ios/setup
     - https://docs.flutter.dev/platform-integration/macos
 
-- name: architecture
+- name: flutter-environment-setup-windows
+  description: Set up a Windows environment for Flutter development
+  instructions: |
+    To set up Flutter on Windows, you need to add the Flutter SDK's `bin` directory to your system's
+    PATH environment variable. This allows you to use `flutter` and `dart` command-line tools in
+    terminals and IDEs.
+    
+    Here's a general process for adding Flutter to your PATH on Windows:
+    1.  **Determine your Flutter SDK installation location**. Copy the absolute path to the
+    directory where you downloaded and extracted the Flutter SDK.
+    2.  **Navigate to the environment variables settings**. You can do this by pressing `Windows +
+    Pause` (if your keyboard lacks a Pause key, try `Windows + Fn + B`). This opens the System >
+    About dialog.
+    3.  Click `Advanced System Settings` > `Advanced` > `Environment Variables...`. The Environment
+    Variables dialog will open.
+    4.  **Add the Flutter SDK `bin` to your path**.
+        *   In the "User variables for (username)" section, look for the `Path` entry.
+        *   If `Path` exists, double-click it. The Edit Environment Variable dialog should open.
+        *   Double-click inside an empty row.
+        *   Type the path to the `bin` directory of your Flutter installation. For example, if
+            Flutter is in `develop\flutter` within your user directory, you'd type
+            `%USERPROFILE%\develop\flutter\bin`.
+        *   Click the Flutter entry you added to select it.
+        *   Click `Move Up` until the Flutter entry is at the top of the list.
+        *   If the `Path` entry doesn't exist, click `New...`. In the Variable Name box, type
+            `Path`, and in the Variable Value box, type the path to the `bin` directory of your
+            Flutter installation (e.g., `%USERPROFILE%\develop\flutter\bin`).
+        *   To confirm your changes, click `OK` three times.
+    5.  **Apply your changes**. Close and reopen all open command prompts, terminal sessions, and
+    IDEs to get access to the `flutter` tool.
+    6.  **Validate your setup**. Open a command prompt or terminal and run `flutter --version` and
+    `dart --version`. If either command isn't found, refer to Flutter installation troubleshooting.
+    
+    **Troubleshooting Common Issues:**
+    *   **Flutter installed in a directory requiring elevated privileges:** If Flutter is installed
+        in a directory like `C:\Program Files\`, which requires elevated privileges, relocate it to
+        a different folder, such as `C:\src\flutter`.
+    *   **`Invoke-Expression : You cannot call a method on a null-valued expression` error:** This
+        error often occurs when the `SystemRoot` environment variable is missing or PowerShell's
+        execution policy prevents scripts from running.
+        *   Run PowerShell as an Administrator.
+        *   Ensure the `SystemRoot` environment variable is set (usually to `C:\Windows`) by running
+            `echo $env:SystemRoot` in PowerShell.
+        *   If the issue persists, adjust the execution policy by running `Set-ExecutionPolicy
+            -ExecutionPolicy RemoteSigned -Scope CurrentUser` in an Administrator PowerShell window.
+    *   **`'flutter' is not recognized as an internal or external command`:** This indicates that
+        Flutter was not added to the PATH environment variable. Follow the instructions for adding a
+        command to your path.
+    *   **Flutter SDK in a protected folder:** If you see an error stating "The Flutter SDK is
+        installed in a protected folder and may not function correctly," move the SDK to a
+        user-writable location without administrative permissions and restart.
+  resources:
+    - https://docs.flutter.dev/install
+    - https://docs.flutter.dev/install/add-to-path
+    - https://docs.flutter.dev/install/manual
+    - https://docs.flutter.dev/install/troubleshoot
+    - https://docs.flutter.dev/platform-integration/windows/building
+    - https://docs.flutter.dev/platform-integration/windows/setup
+    - https://docs.flutter.dev/tools/vs-code
+    
+- name: flutter-architecture
   description: Configure Flutter SDK on the user's machine, setup IDEs, and diagnose CLI errors.
   instructions: |
     Architecture is a broad term that can refer to many topics depending on the context. In the
