@@ -6,6 +6,36 @@
 # To generate skills, use the following command (from the `tool` directory):
 # dart run skills generate-skill --config ../resources/flutter_skills.yaml --output ../skills
 
+- name: flutter-environment-setup-linux
+  description: Set up a Linux environment for Flutter development
+  instructions: |
+    Setting up a Linux environment for app development involves configuring your
+    system to run, build, and deploy applications. This often includes
+    installing necessary tools and prerequisites.
+
+    For Flutter app development on Linux, you need to configure your development
+    environment to build Flutter apps for the Linux desktop. If you haven't
+    already, you should first set up Flutter by following the "Get started with
+    Flutter" guide, and ensure it's up to date. To run and debug desktop Flutter
+    apps on Linux, you'll need to download and install prerequisite packages.
+    These prerequisites can include `curl`, `git`, `unzip`, `xz-utils`, `zip`,
+    and `libglu1-mesa`. On Debian-based distributions like Ubuntu, these
+    packages can be installed using `sudo apt-get update -y && sudo apt-get
+    upgrade -y` followed by `sudo apt-get install -y curl git unzip xz-utils zip
+    libglu1-mesa`. For the best experience, consider installing an editor or IDE
+    with Flutter support. If you are developing on a Chromebook, you need to
+    turn on Linux support and ensure it's up to date.
+  resources:
+    - https://docs.flutter.dev/platform-integration/linux/setup
+    - https://docs.flutter.dev/platform-integration/android/setup
+    - https://docs.flutter.dev/install
+    - https://docs.flutter.dev/deployment/linux
+    - https://docs.flutter.dev/platform-integration/linux
+    - https://docs.flutter.dev/install/manual
+    - https://docs.flutter.dev/install/custom
+    - https://docs.flutter.dev/platform-integration/linux/building
+    - https://docs.flutter.dev/learn/pathway/quick-install
+
 - name: flutter-environment-setup-macos
   description: Set up a macOS environment for Flutter development
   instructions: |
@@ -118,38 +148,8 @@
     - https://docs.flutter.dev/platform-integration/windows/setup
     - https://docs.flutter.dev/tools/vs-code
 
-- name: flutter-environment-setup-linux
-  description: Set up a Linux environment for Flutter development
-  instructions: |
-    Setting up a Linux environment for app development involves configuring your
-    system to run, build, and deploy applications. This often includes
-    installing necessary tools and prerequisites.
-
-    For Flutter app development on Linux, you need to configure your development
-    environment to build Flutter apps for the Linux desktop. If you haven't
-    already, you should first set up Flutter by following the "Get started with
-    Flutter" guide, and ensure it's up to date. To run and debug desktop Flutter
-    apps on Linux, you'll need to download and install prerequisite packages.
-    These prerequisites can include `curl`, `git`, `unzip`, `xz-utils`, `zip`,
-    and `libglu1-mesa`. On Debian-based distributions like Ubuntu, these
-    packages can be installed using `sudo apt-get update -y && sudo apt-get
-    upgrade -y` followed by `sudo apt-get install -y curl git unzip xz-utils zip
-    libglu1-mesa`. For the best experience, consider installing an editor or IDE
-    with Flutter support. If you are developing on a Chromebook, you need to
-    turn on Linux support and ensure it's up to date.
-  resources:
-    - https://docs.flutter.dev/platform-integration/linux/setup
-    - https://docs.flutter.dev/platform-integration/android/setup
-    - https://docs.flutter.dev/install
-    - https://docs.flutter.dev/deployment/linux
-    - https://docs.flutter.dev/platform-integration/linux
-    - https://docs.flutter.dev/install/manual
-    - https://docs.flutter.dev/install/custom
-    - https://docs.flutter.dev/platform-integration/linux/building
-    - https://docs.flutter.dev/learn/pathway/quick-install
-
 - name: flutter-architecture
-  description: Use the Flutter team's recommended app architecture
+  description: Build an app using the Flutter team's recommended app architecture
   instructions: |
     Architecture is a broad term that can refer to many topics depending on the
     context. In the context of Flutter, architecture refers to how to structure,
@@ -227,3 +227,55 @@
     - https://docs.flutter.dev/app-architecture/case-study/data-layer
     - https://docs.flutter.dev/app-architecture/design-patterns/key-value-data
     - https://docs.flutter.dev/learn/pathway/how-flutter-works
+- name: flutter-layout
+  description: How to build your app's layout using Flutter's layout widgets and constraint system
+  instructions: |
+    In Flutter, almost everything is a widget, including layout models. Widgets
+    are classes used to build user interfaces (UIs) and UI elements. Visible
+    elements like images, icons, and text are widgets, as are invisible elements
+    like rows, columns, and grids that arrange, constrain, and align visible
+    widgets. Layouts are created by composing simpler widgets to build more
+    complex ones.
+
+    Understanding constraints is crucial for Flutter layout, as layout generally
+    refers to the size and position of widgets on the screen. A widget's size
+    and position are constrained by its parent, meaning it cannot choose its own
+    size or placement. Instead, these are determined through a conversation
+    between the widget and its parent.
+
+    When building a Flutter layout, it's helpful to plan the layout beforehand
+    to speed up coding. This can involve using visual cues, an interface design
+    tool, or even a pencil and paper to determine where elements should be
+    placed on the screen before writing code. Key questions to ask when breaking
+    down a layout include identifying rows, columns, grids, overlapping
+    elements, tabs, and what needs alignment, padding, or borders. Identifying
+    larger elements, such as an image, rows, and text blocks, is also important.
+
+    Common layout patterns involve arranging widgets vertically or horizontally.
+    A `Row` widget arranges widgets horizontally, while a `Column` widget
+    arranges them vertically. Both `Row` and `Column` widgets take a list of
+    child widgets, and these children can themselves be other `Row`, `Column`,
+    or complex widgets. You can specify how `Row` or `Column` widgets align
+    their children, both vertically and horizontally, and how child widgets use
+    the available space. Nesting rows and columns inside each other is a common
+    practice. The `Container` widget is a versatile widget that allows
+    customization of its child, such as adding padding, margins, borders, or
+    background colors.
+
+    Flutter's layout mechanism aims to enable the development of apps from a
+    single codebase that look and feel great on any platform, accommodating
+    various screen sizes and input devices. This involves concepts of adaptive
+    and responsive design. Responsive design focuses on fitting the UI into the
+    available space by adjusting the placement of design elements, while
+    adaptive design ensures the UI is usable within that space.
+  resources:
+    - https://docs.flutter.dev/ui/layout
+    - https://docs.flutter.dev/ui/layout/tutorial
+    - https://docs.flutter.dev/get-started/fundamentals/layout
+    - https://docs.flutter.dev/ui/design/material
+    - https://docs.flutter.dev/learn/tutorial/layout
+    - https://docs.flutter.dev/ui/adaptive-responsive
+    - https://docs.flutter.dev/learn/tutorial/adaptive-layout
+    - https://docs.flutter.dev/ui/layout/constraints
+    - https://docs.flutter.dev/ui/widgets/layout
+    - https://docs.flutter.dev/learn/pathway/tutorial/layout
