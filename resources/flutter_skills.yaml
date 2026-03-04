@@ -720,3 +720,61 @@
     - https://docs.flutter.dev/perf/isolates
     - https://docs.flutter.dev/resources/architectural-overview
     - https://docs.flutter.dev/ui
+- name: flutter-http-and-json
+  description: Make HTTP requests and encode / decode JSON
+  instructions: |
+    HTTP and JSON are fundamental for networking and data handling in
+    applications.
+  
+    **HTTP (Hypertext Transfer Protocol)**
+    HTTP is used for networking, allowing applications to fetch, send, update,
+    and delete data over the internet. The `http` package provides a simple way
+    to issue HTTP requests. This package is supported across various platforms
+    including Android, iOS, macOS, Windows, Linux, and the web. When making HTTP
+    requests, it's crucial to handle network errors; a status code of 200
+    typically indicates success, while other codes signify errors. For Android
+    apps, declaring internet usage in the `AndroidManifest.xml` is required.
+    Similarly, macOS apps need to allow network access in their `.entitlements`
+    files.
+  
+    Common HTTP operations include fetching data from an API, making
+    authenticated requests, sending data, updating data, and deleting data. When
+    building HTTP requests, it's recommended to use constructors like
+    `Uri.https` to safely build URLs, as this handles encoding and formatting
+    more reliably than string concatenation. Asynchronous operations in HTTP
+    requests are managed using `async` and `await` keywords, where `async` marks
+    a method as asynchronous and `await` pauses execution until a `Future`
+    completes.
+  
+    **JSON (JavaScript Object Notation)**
+    JSON is a lightweight data-interchange format often used with HTTP requests
+    for sending and receiving structured data. Applications frequently parse
+    JSON in the background. When a server returns a 200 OK response, the JSON
+    data can be parsed. For example, a `Summary` instance can be created from a
+    JSON map using a `fromJson` constructor. Similarly, an `ImageFile` can be
+    deserialized from JSON.
+
+    Reliable JSON output is essential for integrating AI into applications. When
+    working with AI models, you can specify the output schema in the system
+    instruction to ensure reliable JSON output. This allows for parsing the
+    model's text response as JSON and extracting specific data fields like
+    width, height, grid data, and clues data. JSON serialization is a key aspect
+    of data handling. For instance, when updating data over the internet, the
+    request body can be encoded into JSON using `jsonEncode`. Conversely,
+    `jsonDecode` is used to parse the JSON response body.
+  resources:
+    - https://docs.flutter.dev/ai/best-practices/structure-output
+    - https://docs.flutter.dev/cookbook/networking/background-parsing
+    - https://docs.flutter.dev/cookbook/networking/delete-data
+    - https://docs.flutter.dev/cookbook/networking/fetch-data
+    - https://docs.flutter.dev/cookbook/networking/send-data
+    - https://docs.flutter.dev/cookbook/networking/update-data
+    - https://docs.flutter.dev/data-and-backend/networking
+    - https://docs.flutter.dev/data-and-backend/serialization/json
+    - https://docs.flutter.dev/flutter-for/react-native-devs
+    - https://docs.flutter.dev/get-started/fundamentals/dart
+    - https://docs.flutter.dev/get-started/fundamentals/index.html.md
+    - https://docs.flutter.dev/get-started/fundamentals/networking
+    - https://docs.flutter.dev/learn/pathway/tutorial/http-requests
+    - https://docs.flutter.dev/release/breaking-changes/asset-manifest-dot-json
+    - https://docs.flutter.dev/release/breaking-changes/network-policy-ios-android
