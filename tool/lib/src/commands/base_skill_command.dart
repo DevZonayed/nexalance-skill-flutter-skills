@@ -19,12 +19,20 @@ abstract class BaseSkillCommand extends BaseYamlCommand {
     super.outputDir,
     this.environment,
   }) {
-    argParser.addOption(
-      'thinking-budget',
-      help:
-          'The token budget for the model to "think". Defaults to ${GeminiService.defaultThinkingBudget} (recommended for technical documentation).',
-      defaultsTo: GeminiService.defaultThinkingBudget.toString(),
-    );
+    argParser
+      ..addOption(
+        'thinking-budget',
+        help:
+            'The token budget for the model to "think". Defaults to ${GeminiService.defaultThinkingBudget} (recommended for technical documentation).',
+        defaultsTo: GeminiService.defaultThinkingBudget.toString(),
+      )
+      ..addFlag(
+        'dry-run',
+        abbr: 'n',
+        help:
+            'Simulate the command without making API calls or modifying files.',
+        negatable: false,
+      );
   }
 
   /// The HTTP client used for fetching resources.
