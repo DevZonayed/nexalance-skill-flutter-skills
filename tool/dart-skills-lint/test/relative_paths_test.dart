@@ -4,6 +4,8 @@ import 'package:dart_skills_lint/src/models/check_type.dart';
 import 'package:dart_skills_lint/src/validator.dart';
 import 'package:test/test.dart';
 
+import 'test_utils.dart';
+
 void main() {
   group('Relative Paths Validation', () {
     late Directory tempDir;
@@ -20,13 +22,8 @@ void main() {
 
     test('passes with valid relative file path (existing file)', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-[Link to a reference](references/DETAILS.md)
-''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}[Link to a reference](references/DETAILS.md)\n');
 
       final Directory refDir = await Directory('${skillDir.path}/references').create();
       await File('${refDir.path}/DETAILS.md').writeAsString('Details here');
@@ -43,13 +40,8 @@ description: A test skill
 
     test('warns with missing relative file path', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-[Link to a references file missing](references/MISSING.md)
-''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}[Link to a references file missing](references/MISSING.md)\n');
 
       final validator = Validator(rules: {
         CheckType(name: 'check-relative-paths', defaultSeverity: AnalysisSeverity.warning)
@@ -62,13 +54,8 @@ description: A test skill
 
     test('fails with absolute file path', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-[Absolute path link](/tmp/some_absolute_path/file.md)
-''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}[Absolute path link](/tmp/some_absolute_path/file.md)\n');
 
       final validator = Validator(rules: {
         CheckType(name: 'check-relative-paths', defaultSeverity: AnalysisSeverity.warning)
@@ -81,18 +68,8 @@ description: A test skill
 
     test('ignores web URLs, emails, javascript, data URIs, and anchors', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-- [Web link](http://example.com)
-- [Web TLS link](https://example.com)
-- [Email link](mailto:user@domain.com)
-- [JS link](javascript:alert(1))
-- [Data URI](data:image/png;base64,iVBORw)
-- [Anchor link](#section-name)
-''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}- [Web link](http://example.com)\n- [Web TLS link](https://example.com)\n- [Email link](mailto:user@domain.com)\n- [JS link](javascript:alert(1))\n- [Data URI](data:image/png;base64,iVBORw)\n- [Anchor link](#section-name)\n');
 
       final validator = Validator(rules: {
         CheckType(name: 'check-relative-paths', defaultSeverity: AnalysisSeverity.warning)

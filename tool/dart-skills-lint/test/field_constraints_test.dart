@@ -3,14 +3,7 @@ import 'dart:io';
 import 'package:dart_skills_lint/src/validator.dart';
 import 'package:test/test.dart';
 
-String _buildFrontmatter({String name = 'Skill-Name', String description = 'A test skill'}) {
-  return '''
----
-name: $name
-description: $description
----
-''';
-}
+import 'test_utils.dart';
 
 void main() {
   group('Field Specific Constraints Validation', () {
@@ -29,7 +22,7 @@ void main() {
     group('Skill Name', () {
       test('fails if not lowercase', () async {
         final Directory skillDir = await Directory('${tempDir.path}/Skill-Name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'Skill-Name')}Body');
+        await File('${skillDir.path}/SKILL.md').writeAsString('${buildFrontmatter()}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -39,7 +32,8 @@ void main() {
       test('fails if too long (> ${Validator.maxNameLength} chars)', () async {
         final String longName = 'a' * (Validator.maxNameLength + 1);
         final Directory skillDir = await Directory('${tempDir.path}/$longName').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: longName)}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: longName)}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -48,7 +42,8 @@ void main() {
 
       test('fails if contains invalid characters', () async {
         final Directory skillDir = await Directory('${tempDir.path}/skill_name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'skill_name')}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: 'skill_name')}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -57,7 +52,8 @@ void main() {
 
       test('fails if has leading hyphen', () async {
         final Directory skillDir = await Directory('${tempDir.path}/-skill-name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: '-skill-name')}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: '-skill-name')}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -66,7 +62,8 @@ void main() {
 
       test('fails if has trailing hyphen', () async {
         final Directory skillDir = await Directory('${tempDir.path}/skill-name-').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'skill-name-')}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: 'skill-name-')}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -75,7 +72,8 @@ void main() {
 
       test('fails if has consecutive hyphens', () async {
         final Directory skillDir = await Directory('${tempDir.path}/skill--name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'skill--name')}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: 'skill--name')}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -84,7 +82,8 @@ void main() {
 
       test('fails if name does not match directory name', () async {
         final Directory skillDir = await Directory('${tempDir.path}/wrong-name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'right-name')}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: 'right-name')}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
@@ -97,7 +96,8 @@ void main() {
       test('fails if too long (> ${Validator.maxDescriptionLength} chars)', () async {
         final String longDesc = 'a' * (Validator.maxDescriptionLength + 1);
         final Directory skillDir = await Directory('${tempDir.path}/skill-name').create();
-        await File('${skillDir.path}/SKILL.md').writeAsString('${_buildFrontmatter(name: 'skill-name', description: longDesc)}Body');
+        await File('${skillDir.path}/SKILL.md')
+            .writeAsString('${buildFrontmatter(name: 'skill-name', description: longDesc)}Body');
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);

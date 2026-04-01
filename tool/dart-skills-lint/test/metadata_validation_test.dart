@@ -5,6 +5,8 @@ import 'package:dart_skills_lint/src/rules.dart';
 import 'package:dart_skills_lint/src/validator.dart';
 import 'package:test/test.dart';
 
+import 'test_utils.dart';
+
 void main() {
   group('Metadata (YAML) Validation', () {
     late Directory tempDir;
@@ -96,12 +98,8 @@ Body''');
       // We need to make sure directory name matches name in metadata
       final skillDir = Directory('${tempDir.path}/metadata-test');
       await skillDir.create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: metadata-test
-description: A test skill
----
-Body''');
+      await File('${skillDir.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'metadata-test')}Body');
 
       final ValidationResult result = await validator.validate(skillDir);
 

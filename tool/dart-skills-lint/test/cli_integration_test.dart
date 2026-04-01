@@ -6,6 +6,8 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:test_process/test_process.dart';
 
+import 'test_utils.dart';
+
 void main() {
   group('CLI Integration', () {
     late Directory tempDir;
@@ -22,14 +24,8 @@ void main() {
 
     test('de-duplicates baseline entries for multiple identical rule failures', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-[Link 1](missing1.md)
-[Link 2](missing2.md)
-''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}[Link 1](missing1.md)\n[Link 2](missing2.md)\n');
 
       // Run with --generate-baseline
       final TestProcess process = await TestProcess.start(
@@ -42,6 +38,7 @@ description: A test skill
       expect(await ignoreFile.exists(), isTrue);
 
       final String content = await ignoreFile.readAsString();
+      // ignore: specify_nonobvious_local_variable_types
       final json = jsonDecode(content);
       final skills = json['skills'] as Map<String, dynamic>;
       final ignores = skills['test-skill'] as List;
@@ -56,23 +53,13 @@ description: A test skill
 
       // Create skill-one with a broken link
       final Directory skill1Dir = await Directory('${skillsDir.path}/skill-one').create();
-      await File('${skill1Dir.path}/SKILL.md').writeAsString('''
----
-name: skill-one
-description: Skill one with a broken link
----
-[Link to nowhere](../nowhere/SKILL.md)
-''');
+      await File('${skill1Dir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'skill-one', description: 'Skill one with a broken link')}[Link to nowhere](../nowhere/SKILL.md)\n');
 
       // Create skill-two with a broken link
       final Directory skill2Dir = await Directory('${skillsDir.path}/skill-two').create();
-      await File('${skill2Dir.path}/SKILL.md').writeAsString('''
----
-name: skill-two
-description: Skill two with a broken link
----
-[Link to nowhere](../nowhere/SKILL.md)
-''');
+      await File('${skill2Dir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'skill-two', description: 'Skill two with a broken link')}[Link to nowhere](../nowhere/SKILL.md)\n');
 
       final configFile = File('${tempDir.path}/dart_skills_lint.yaml');
       await configFile.writeAsString('''
@@ -118,12 +105,8 @@ dart_skills_lint:
 
     test('exits with 0 and success message for valid skill', () async {
       final Directory skillDir = await Directory('${tempDir.path}/valid-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: valid-skill
-description: A valid skill
----
-Body''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'valid-skill', description: 'A valid skill')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -154,20 +137,12 @@ Body''');
     test('exits with 0 and validates subdirectories if named "skills"', () async {
       final Directory skillsDir = await Directory('${tempDir.path}/skills').create();
       final Directory skill1 = await Directory('${skillsDir.path}/skill-a').create();
-      await File('${skill1.path}/SKILL.md').writeAsString('''
----
-name: skill-a
-description: Skill A
----
-Body''');
+      await File('${skill1.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-a', description: 'Skill A')}Body');
 
       final Directory skill2 = await Directory('${skillsDir.path}/skill-b').create();
-      await File('${skill2.path}/SKILL.md').writeAsString('''
----
-name: skill-b
-description: Skill B
----
-Body''');
+      await File('${skill2.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-b', description: 'Skill B')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -190,12 +165,8 @@ Body''');
     test('exits with 1 if any subdirectory skill fails in "skills" folder', () async {
       final Directory skillsDir = await Directory('${tempDir.path}/skills').create();
       final Directory skill1 = await Directory('${skillsDir.path}/skill-a').create();
-      await File('${skill1.path}/SKILL.md').writeAsString('''
----
-name: skill-a
-description: Skill A
----
-Body''');
+      await File('${skill1.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-a', description: 'Skill A')}Body');
 
       await Directory('${skillsDir.path}/skill-b').create(); // No SKILL.md
 
@@ -223,12 +194,8 @@ Body''');
       // skill-a does not create SKILL.md, so it is invalid and will fail first (sorted order)
 
       await Directory('${skillsDir.path}/skill-b').create();
-      await File('${p.join(tempDir.path, 'skills', 'skill-b')}/SKILL.md').writeAsString('''
----
-name: skill-b
-description: Skill B
----
-Body''');
+      await File('${p.join(tempDir.path, 'skills', 'skill-b')}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-b', description: 'Skill B')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -250,12 +217,8 @@ Body''');
 
     test('exits with 0 and suppresses success messages if --quiet is passed', () async {
       final Directory skillDir = await Directory('${tempDir.path}/valid-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: valid-skill
-description: A valid skill
----
-Body''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'valid-skill', description: 'A valid skill')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -284,12 +247,8 @@ Body''');
       final Directory claudeDir =
           await Directory('${tempDir.path}/.claude/skills').create(recursive: true);
       final Directory skillDir = await Directory('${claudeDir.path}/valid-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: valid-skill
-description: A valid skill
----
-Body''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'valid-skill', description: 'A valid skill')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -303,12 +262,8 @@ Body''');
     });
     test('expands ~/ to HOME environment variable', () async {
       final Directory skillDir = await Directory('${tempDir.path}/some-skill').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: some-skill
-description: A test skill
----
-Body''');
+      await File('${skillDir.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'some-skill')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -356,12 +311,8 @@ Body''');
 
     test('fails if -d specifies a single skill directory (no sub-folders found)', () async {
       final Directory skillAsRoot = await Directory('${tempDir.path}/single-skill-root').create();
-      await File('${skillAsRoot.path}/SKILL.md').writeAsString('''
----
-name: single-skill-root
-description: Not a root, but a skill folder.
----
-Body''');
+      await File('${skillAsRoot.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'single-skill-root', description: 'Not a root, but a skill folder.')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -378,20 +329,12 @@ Body''');
 
     test('validates multiple skills with multiple -s flags', () async {
       final Directory skill1 = await Directory('${tempDir.path}/skill-1').create();
-      await File('${skill1.path}/SKILL.md').writeAsString('''
----
-name: skill-1
-description: Skill 1
----
-Body''');
+      await File('${skill1.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-1', description: 'Skill 1')}Body');
 
       final Directory skill2 = await Directory('${tempDir.path}/skill-2').create();
-      await File('${skill2.path}/SKILL.md').writeAsString('''
----
-name: skill-2
-description: Skill 2
----
-Body''');
+      await File('${skill2.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-2', description: 'Skill 2')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',
@@ -410,12 +353,8 @@ Body''');
       await malformedFile.writeAsString('{ malformed json }');
 
       final Directory skillFolder = await Directory('${tempDir.path}/skill-x').create();
-      await File('${skillFolder.path}/SKILL.md').writeAsString('''
----
-name: skill-x
-description: Valid skill
----
-Body''');
+      await File('${skillFolder.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-x', description: 'Valid skill')}Body');
 
       final TestProcess process = await TestProcess.start(
         'dart',

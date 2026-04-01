@@ -4,6 +4,8 @@ import 'package:dart_skills_lint/src/models/check_type.dart';
 import 'package:dart_skills_lint/src/validator.dart';
 import 'package:test/test.dart';
 
+import 'test_utils.dart';
+
 void main() {
   group('Relative Path Flag Validation', () {
     late Directory tempDir;
@@ -21,12 +23,8 @@ void main() {
     test('validates links when relativePathsSeverity = warning', () async {
       final skillDir = Directory('${tempDir.path}/test-skill');
       await skillDir.create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-Body with [broken link](missing.md) and [absolute link](/absolute/path.md)''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}Body with [broken link](missing.md) and [absolute link](/absolute/path.md)');
 
       final validator = Validator(rules: {
         CheckType(name: 'check-relative-paths', defaultSeverity: AnalysisSeverity.warning)
@@ -42,12 +40,8 @@ Body with [broken link](missing.md) and [absolute link](/absolute/path.md)''');
     test('passes when relativePathsSeverity = warning and links are valid', () async {
       final skillDir = Directory('${tempDir.path}/test-skill');
       await skillDir.create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: test-skill
-description: A test skill
----
-Body with [valid relative link](valid.md)''');
+      await File('${skillDir.path}/SKILL.md').writeAsString(
+          '${buildFrontmatter(name: 'test-skill')}Body with [valid relative link](valid.md)');
       await File('${skillDir.path}/valid.md').writeAsString('Valid file content');
 
       final validator = Validator(rules: {
