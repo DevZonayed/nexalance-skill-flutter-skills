@@ -14,16 +14,18 @@ class IgnoreEntry {
     required this.fileName,
     this.used = false,
   });
-
   /// Creates an IgnoreEntry from a JSON map.
   factory IgnoreEntry.fromJson(Map<String, dynamic> json) => _$IgnoreEntryFromJson(json);
 
+  static const String ruleIdKey = 'rule_id';
+  static const String fileNameKey = 'file_name';
+
   /// The rule ID that should be suppressed (e.g., 'description_too_long').
-  @JsonKey(name: 'rule_id')
+  @JsonKey(name: ruleIdKey)
   final String ruleId;
 
   /// The file name to apply this suppression to.
-  @JsonKey(name: 'file_name')
+  @JsonKey(name: fileNameKey)
   final String fileName;
 
   /// Whether this entry has been used during the run.

@@ -388,7 +388,7 @@ Future<Map<String, List<IgnoreEntry>>> _loadIgnores(
     if (ignoreFileOverride != null) {
       _log.warning('File not found generating-baseline');
       try {
-        await file.writeAsString(jsonEncode({'skills': <String, dynamic>{}}));
+        await file.writeAsString(jsonEncode({SkillsIgnores.skillsKey: <String, dynamic>{}}));
       } catch (_) {
         // Fallback or ignore write errors
       }

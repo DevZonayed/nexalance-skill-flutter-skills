@@ -9,9 +9,9 @@ import 'package:test/test.dart';
 void main() {
   group('IgnoreEntry Serialization', () {
     test('fromJson parses rule_id and file_name', () {
-      final json = {
-        'rule_id': 'description_too_long',
-        'file_name': 'SKILL.md',
+      final Map<String, dynamic> json = {
+        IgnoreEntry.ruleIdKey: 'description_too_long',
+        IgnoreEntry.fileNameKey: 'SKILL.md',
       };
       final entry = IgnoreEntry.fromJson(json);
       expect(entry.ruleId, equals('description_too_long'));
@@ -22,18 +22,18 @@ void main() {
     test('toJson serializes rule_id and file_name', () {
       final entry = IgnoreEntry(ruleId: 'description_too_long', fileName: 'SKILL.md');
       final Map<String, dynamic> json = entry.toJson();
-      expect(json['rule_id'], equals('description_too_long'));
-      expect(json['file_name'], equals('SKILL.md'));
+      expect(json[IgnoreEntry.ruleIdKey], equals('description_too_long'));
+      expect(json[IgnoreEntry.fileNameKey], equals('SKILL.md'));
       expect(json.containsKey('used'), isFalse); // Suppressed
     });
   });
 
   group('SkillsIgnores Serialization', () {
     test('fromJson parses nested skills map', () {
-      final json = {
-        'skills': {
+      final Map<String, dynamic> json = {
+        SkillsIgnores.skillsKey: {
           'skill-a': [
-            {'rule_id': 'rule1', 'file_name': 'file1.md'},
+            {IgnoreEntry.ruleIdKey: 'rule1', IgnoreEntry.fileNameKey: 'file1.md'},
           ],
         },
       };
@@ -50,12 +50,12 @@ void main() {
       });
       final Map<String, dynamic> json = ignores.toJson();
 
-      expect(json.containsKey('skills'), isTrue);
-      final skillsJson = json['skills'] as Map<String, dynamic>;
+      expect(json.containsKey(SkillsIgnores.skillsKey), isTrue);
+      final skillsJson = json[SkillsIgnores.skillsKey] as Map<String, dynamic>;
       expect(skillsJson.containsKey('skill-a'), isTrue);
       final skillAList = skillsJson['skill-a'] as List<dynamic>;
       final firstItem = skillAList[0] as Map<String, dynamic>;
-      expect(firstItem['rule_id'], equals('rule1'));
+      expect(firstItem[IgnoreEntry.ruleIdKey], equals('rule1'));
     });
   });
 }

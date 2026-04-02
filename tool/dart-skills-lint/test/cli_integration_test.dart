@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_skills_lint/src/entry_point.dart';
+import 'package:dart_skills_lint/src/models/skills_ignores.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:test_process/test_process.dart';
@@ -43,7 +44,7 @@ void main() {
 
       final String content = await ignoreFile.readAsString();
       final json = jsonDecode(content) as Map<String, dynamic>;
-      final skills = json['skills'] as Map<String, dynamic>;
+      final skills = json[SkillsIgnores.skillsKey] as Map<String, dynamic>;
       final ignores = skills['test-skill'] as List;
 
       // Should be 1 entry only! Both relative link failures utilize the same ruleId/fileName de-duplication.
@@ -92,7 +93,7 @@ dart_skills_lint:
 
       final String content = await ignoreFile.readAsString();
       final json = jsonDecode(content) as Map<String, dynamic>;
-      final skills = json['skills'] as Map<String, dynamic>;
+      final skills = json[SkillsIgnores.skillsKey] as Map<String, dynamic>;
 
       expect(skills.containsKey('skill-one'), isTrue);
       expect(skills.containsKey('skill-two'), isTrue);

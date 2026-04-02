@@ -15,7 +15,10 @@ class SkillsIgnores {
   /// Creates a SkillsIgnores from a JSON map.
   factory SkillsIgnores.fromJson(Map<String, dynamic> json) => _$SkillsIgnoresFromJson(json);
 
+  static const String skillsKey = 'skills';
+
   /// Map of skill names to their list of ignore entries.
+  @JsonKey(name: skillsKey)
   final Map<String, List<IgnoreEntry>> skills;
 
   /// Converts a SkillsIgnores to a JSON map.
