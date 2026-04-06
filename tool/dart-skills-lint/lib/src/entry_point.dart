@@ -254,6 +254,9 @@ Future<void> runApp(List<String> args) async {
 
     for (final entity in entities) {
       if (entity is Directory) {
+        if (p.basename(entity.path).startsWith('.')) {
+          continue;
+        }
         anySkillsValidated = true;
         final ValidationResult result = await _validateSingleSkill(
           skillDir: entity,

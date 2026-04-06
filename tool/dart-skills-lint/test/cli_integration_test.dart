@@ -166,6 +166,28 @@ dart_skills_lint:
       await process.shouldExit(0);
     });
 
+    test('ignores subdirectories starting with a dot "." in "skills" folder', () async {
+      final Directory skillsDir = await Directory('${tempDir.path}/skills').create();
+      final Directory skill1 = await Directory('${skillsDir.path}/skill-a').create();
+      await File('${skill1.path}/SKILL.md')
+          .writeAsString('${buildFrontmatter(name: 'skill-a', description: 'Skill A')}Body');
+
+      await Directory('${skillsDir.path}/.dart_tool').create();
+
+      final TestProcess process = await TestProcess.start(
+        'dart',
+        ['bin/dart_skills_lint.dart', '-d', skillsDir.path],
+      );
+
+      final List<String> stdout = await process.stdout.rest.toList();
+      final String stdoutStr = stdout.join('\n');
+      expect(stdoutStr, contains('--- Validating skill: skill-a ---'));
+      expect(stdoutStr, contains(skillIsValidMsg));
+      expect(stdoutStr, isNot(contains('.dart_tool')));
+
+      await process.shouldExit(0);
+    });
+
     test('exits with 1 if any subdirectory skill fails in "skills" folder', () async {
       final Directory skillsDir = await Directory('${tempDir.path}/skills').create();
       final Directory skill1 = await Directory('${skillsDir.path}/skill-a').create();

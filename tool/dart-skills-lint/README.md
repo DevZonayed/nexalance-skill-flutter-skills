@@ -96,6 +96,7 @@ The linter checks against the criteria defined in `documentation/knowledge/SPECI
 ### 1. Directory and File Structure
 - Path existence and directory verification.
 - Mandatory `SKILL.md` file at the root.
+- Directories starting with a dot `.` (e.g., `.dart_tool`) are ignored when scanning for skills.
 
 ### 2. Metadata (YAML Frontmatter)
 - Valid YAML syntax.
