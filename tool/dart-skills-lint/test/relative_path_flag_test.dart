@@ -31,8 +31,10 @@ void main() {
       await File('${skillDir.path}/SKILL.md').writeAsString(
           '${buildFrontmatter(name: 'test-skill')}Body with [broken link](missing.md) and [absolute link](/absolute/path.md)');
 
-      final validator =
-          Validator(ruleOverrides: {relativePathsCheck.name: AnalysisSeverity.warning});
+      final validator = Validator(ruleOverrides: {
+        relativePathsCheck.name: AnalysisSeverity.warning,
+        absolutePathsCheck.name: AnalysisSeverity.error,
+      });
       final ValidationResult result = await validator.validate(skillDir);
 
       expect(result.isValid, isFalse);

@@ -26,7 +26,7 @@ void main() {
       }
     });
 
-    test('flags absolute path starting with / as error by default', () async {
+    test('flags absolute path starting with / as warning by default', () async {
       final Directory skillDir = await Directory('${tempDir.path}/test-skill').create();
       await File('${skillDir.path}/SKILL.md').writeAsString(
           '${buildFrontmatter(name: 'test-skill')}[Absolute link](/absolute/path.md)\n');
@@ -34,9 +34,9 @@ void main() {
       final validator = Validator();
       final ValidationResult result = await validator.validate(skillDir);
 
-      expect(result.isValid, isFalse);
+      expect(result.isValid, isTrue);
       expect(
-          result.errors, contains(contains('Absolute filepath found in link: /absolute/path.md')));
+          result.warnings, contains(contains('Absolute filepath found in link: /absolute/path.md')));
     });
 
     test('flags windows absolute path starting with drive letter as error', () async {
@@ -47,8 +47,8 @@ void main() {
       final validator = Validator();
       final ValidationResult result = await validator.validate(skillDir);
 
-      expect(result.isValid, isFalse);
-      expect(result.errors,
+      expect(result.isValid, isTrue);
+      expect(result.warnings,
           contains(contains(r'Absolute filepath found in link: C:\absolute\path.md')));
     });
 

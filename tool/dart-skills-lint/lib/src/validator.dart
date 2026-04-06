@@ -55,13 +55,7 @@ class Validator {
     return _ruleOverrides[rule.name] ?? rule.defaultSeverity;
   }
 
-  static const _dirStructureUrl = ' (see https://agentskills.io/specification#directory-structure)';
-  static const _metadataUrl = ' (see https://agentskills.io/specification#frontmatter)';
-  static const _nameFieldUrl = ' (see https://agentskills.io/specification#name-field)';
-  static const _descriptionFieldUrl =
-      ' (see https://agentskills.io/specification#description-field)';
-  static const _compatibilityFieldUrl =
-      ' (see https://agentskills.io/specification#compatibility-field)';
+
 
   static const _nameField = 'name';
   static const _descriptionField = 'description';
@@ -130,7 +124,7 @@ class Validator {
           ruleId: validYamlMetadataCheck.name,
           severity: _getSeverity(validYamlMetadataCheck),
           file: _skillFileName,
-          message: 'Missing YAML metadata in $_skillFileName$_metadataUrl'));
+          message: 'Missing YAML metadata in $_skillFileName (see $metadataUrl)'));
     } else {
       final String yamlStr = match.group(1)!;
       _parseMetadataFields(yamlStr, dir, validationErrors, warnings);
@@ -158,13 +152,13 @@ class Validator {
         validationErrors.add(ValidationError(
             ruleId: pathDoesNotExistCheck.name,
             file: dir.path,
-            message: 'Path is not a directory: ${dir.path}$_dirStructureUrl',
+            message: 'Path is not a directory: ${dir.path} (see $dirStructureUrl)',
             severity: _getSeverity(pathDoesNotExistCheck)));
       } else {
         validationErrors.add(ValidationError(
             ruleId: pathDoesNotExistCheck.name,
             file: dir.path,
-            message: 'Directory does not exist: ${dir.path}$_dirStructureUrl',
+            message: 'Directory does not exist: ${dir.path} (see $dirStructureUrl)',
             severity: _getSeverity(pathDoesNotExistCheck)));
       }
       return false;
@@ -175,7 +169,7 @@ class Validator {
       validationErrors.add(ValidationError(
           ruleId: pathDoesNotExistCheck.name,
           file: dir.path,
-          message: '$_skillFileName is missing in directory: ${dir.path}$_dirStructureUrl',
+          message: '$_skillFileName is missing in directory: ${dir.path} (see $dirStructureUrl)',
           severity: _getSeverity(pathDoesNotExistCheck)));
       return false;
     }
@@ -191,7 +185,7 @@ class Validator {
         validationErrors.add(ValidationError(
             ruleId: validYamlMetadataCheck.name,
             file: _skillFileName,
-            message: 'Invalid YAML metadata: expected a map$_metadataUrl',
+            message: 'Invalid YAML metadata: expected a map (see $metadataUrl)',
             severity: _getSeverity(validYamlMetadataCheck)));
         return;
       }
@@ -201,7 +195,7 @@ class Validator {
           validationErrors.add(ValidationError(
               ruleId: validYamlMetadataCheck.name,
               file: _skillFileName,
-              message: 'Missing required field: $field$_metadataUrl',
+              message: 'Missing required field: $field (see $metadataUrl)',
               severity: _getSeverity(validYamlMetadataCheck)));
         }
       }
@@ -213,7 +207,7 @@ class Validator {
             validationErrors.add(ValidationError(
                 ruleId: disallowedFieldCheck.name,
                 file: _skillFileName,
-                message: 'Disallowed field: $key$_metadataUrl',
+                message: 'Disallowed field: $key (see $metadataUrl)',
                 severity: _getSeverity(disallowedFieldCheck)));
           }
         }
@@ -230,7 +224,7 @@ class Validator {
             ruleId: descriptionTooLongCheck.name,
             file: _skillFileName,
             message:
-                'Description too long. Maximum $maxDescriptionLength characters.$_descriptionFieldUrl',
+                'Description too long. Maximum $maxDescriptionLength characters (see $descriptionFieldUrl)',
             severity: _getSeverity(descriptionTooLongCheck)));
       }
 
@@ -241,7 +235,7 @@ class Validator {
               ruleId: validYamlMetadataCheck.name,
               file: _skillFileName,
               message:
-                  'Compatibility too long. Maximum $maxCompatibilityLength characters.$_compatibilityFieldUrl',
+                  'Compatibility too long. Maximum $maxCompatibilityLength characters (see $compatibilityFieldUrl)',
               severity: _getSeverity(validYamlMetadataCheck)));
         }
       }
@@ -249,7 +243,7 @@ class Validator {
       validationErrors.add(ValidationError(
           ruleId: validYamlMetadataCheck.name,
           file: _skillFileName,
-          message: 'Invalid YAML metadata: $e$_metadataUrl',
+          message: 'Invalid YAML metadata: $e (see $metadataUrl)',
           severity: _getSeverity(validYamlMetadataCheck)));
     }
   }
@@ -259,14 +253,14 @@ class Validator {
       validationErrors.add(ValidationError(
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
-          message: 'Skill name must be lowercase: $name$_nameFieldUrl',
+          message: 'Skill name must be lowercase: $name (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
     if (name.length > maxNameLength) {
       validationErrors.add(ValidationError(
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
-          message: 'Skill name too long. Maximum $maxNameLength characters.$_nameFieldUrl',
+          message: 'Skill name too long. Maximum $maxNameLength characters (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
     if (!_validNameRegex.hasMatch(name)) {
@@ -274,21 +268,21 @@ class Validator {
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
           message:
-              'Skill name contains invalid characters. Only lowercase letters, digits, and hyphens allowed.$_nameFieldUrl',
+              'Skill name contains invalid characters. Only lowercase letters, digits, and hyphens allowed (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
     if (name.startsWith('-') || name.endsWith('-')) {
       validationErrors.add(ValidationError(
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
-          message: 'Skill name cannot have leading or trailing hyphens.$_nameFieldUrl',
+          message: 'Skill name cannot have leading or trailing hyphens (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
     if (name.contains('--')) {
       validationErrors.add(ValidationError(
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
-          message: 'Skill name cannot have consecutive hyphens.$_nameFieldUrl',
+          message: 'Skill name cannot have consecutive hyphens (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
 
@@ -298,7 +292,7 @@ class Validator {
           ruleId: invalidSkillNameCheck.name,
           file: _skillFileName,
           message:
-              'Skill name ($name) must exactly match the name of its parent directory ($dirName).$_nameFieldUrl',
+              'Skill name ($name) must exactly match the name of its parent directory ($dirName) (see $nameFieldUrl)',
           severity: _getSeverity(invalidSkillNameCheck)));
     }
   }

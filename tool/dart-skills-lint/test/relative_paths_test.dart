@@ -60,8 +60,10 @@ void main() {
       await File('${skillDir.path}/SKILL.md').writeAsString(
           '${buildFrontmatter(name: 'test-skill')}[Absolute path link](/tmp/some_absolute_path/file.md)\n');
 
-      final validator =
-          Validator(ruleOverrides: {relativePathsCheck.name: AnalysisSeverity.warning});
+      final validator = Validator(ruleOverrides: {
+        relativePathsCheck.name: AnalysisSeverity.warning,
+        absolutePathsCheck.name: AnalysisSeverity.error,
+      });
       final ValidationResult result = await validator.validate(skillDir);
 
       expect(result.isValid, isFalse);
