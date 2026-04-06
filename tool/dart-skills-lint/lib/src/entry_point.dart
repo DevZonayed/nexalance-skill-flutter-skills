@@ -130,7 +130,7 @@ Future<void> runApp(List<String> args) async {
     }
   }
 
-  final Map<String, AnalysisSeverity> resolvedRules = _resolveRules(results, config);
+  final Map<String, AnalysisSeverity> resolvedRules = resolveRules(results, config);
 
   final printWarnings = results[_printWarningsFlag] as bool;
   final fastFail = results[_fastFailFlag] as bool;
@@ -318,7 +318,8 @@ Future<void> runApp(List<String> args) async {
   exitCode = globalAnyFailed ? 1 : 0;
 }
 
-Map<String, AnalysisSeverity> _resolveRules(ArgResults results, Configuration config) {
+@visibleForTesting
+Map<String, AnalysisSeverity> resolveRules(ArgResults results, Configuration config) {
   final resolved = <String, AnalysisSeverity>{};
 
   resolved[relativePathsCheck.name] = relativePathsCheck.defaultSeverity;
