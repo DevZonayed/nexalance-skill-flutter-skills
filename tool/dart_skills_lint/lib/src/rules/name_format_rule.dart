@@ -4,13 +4,14 @@ import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
+import '../rules.dart';
 
 /// Enforces constraints on the skill name field.
 class NameFormatRule extends SkillRule {
   NameFormatRule({this.severity = AnalysisSeverity.error});
 
   @override
-  final String name = 'invalid-skill-name';
+  final String name = invalidSkillNameCheck.name;
 
   @override
   final AnalysisSeverity severity;
@@ -18,7 +19,7 @@ class NameFormatRule extends SkillRule {
   static const maxNameLength = 64;
   static final _validNameRegex = RegExp(r'^[a-z0-9\-]+$');
   static const _skillFileName = 'SKILL.md';
-  static const _nameFieldUrl = 'https://github.com/flutter/skills#naming-conventions';
+  static const _nameFieldUrl = 'https://agentskills.io/specification#name-field';
 
   @override
   Future<List<ValidationError>> validate(SkillContext context) async {
@@ -58,7 +59,8 @@ class NameFormatRule extends SkillRule {
         ruleId: name,
         severity: severity,
         file: _skillFileName,
-        message: 'Skill name contains invalid characters. Only lowercase letters, digits, and hyphens allowed (see $_nameFieldUrl)',
+        message:
+            'Skill name contains invalid characters. Only lowercase letters, digits, and hyphens allowed (see $_nameFieldUrl)',
       ));
     }
 
@@ -86,7 +88,8 @@ class NameFormatRule extends SkillRule {
         ruleId: name,
         severity: severity,
         file: _skillFileName,
-        message: 'Skill name ($skillName) must exactly match the name of its parent directory ($dirName) (see $_nameFieldUrl)',
+        message:
+            'Skill name ($skillName) must exactly match the name of its parent directory ($dirName) (see $_nameFieldUrl)',
       ));
     }
 

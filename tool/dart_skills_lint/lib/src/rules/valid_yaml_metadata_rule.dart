@@ -3,20 +3,23 @@ import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
+import '../rules.dart';
 
 /// Enforces that SKILL.md has valid YAML frontmatter and required fields.
 class ValidYamlMetadataRule extends SkillRule {
   ValidYamlMetadataRule({this.severity = AnalysisSeverity.error});
 
   @override
-  final String name = 'valid-yaml-metadata';
+  final String name = validYamlMetadataCheck.name;
 
   @override
   final AnalysisSeverity severity;
 
   static const _requiredFields = {'name', 'description'};
   static const _skillFileName = 'SKILL.md';
-  static const _metadataUrl = 'https://github.com/flutter/skills#metadata';
+  static const _metadataUrl = 'https://agentskills.io/specification#frontmatter';
+  static const maxCompatibilityLength = 500;
+  static const _compatibilityFieldUrl = 'https://agentskills.io/specification#compatibility-field';
 
   @override
   Future<List<ValidationError>> validate(SkillContext context) async {
@@ -27,7 +30,8 @@ class ValidYamlMetadataRule extends SkillRule {
         ruleId: name,
         severity: severity,
         file: _skillFileName,
-        message: context.yamlParsingError ?? 'Missing or invalid YAML metadata (see $_metadataUrl)',
+        message:
+            'Invalid YAML metadata: ${context.yamlParsingError ?? 'Missing or invalid'} (see $_metadataUrl)',
       ));
       return errors;
     }
@@ -40,6 +44,19 @@ class ValidYamlMetadataRule extends SkillRule {
           severity: severity,
           file: _skillFileName,
           message: 'Missing required field: $field (see $_metadataUrl)',
+        ));
+      }
+    }
+
+    if (yaml.containsKey('compatibility')) {
+      final String compatibility = yaml['compatibility']?.toString() ?? '';
+      if (compatibility.length > maxCompatibilityLength) {
+        errors.add(ValidationError(
+          ruleId: name,
+          severity: severity,
+          file: _skillFileName,
+          message:
+              'Compatibility field is too long. Maximum $maxCompatibilityLength characters (see $_compatibilityFieldUrl)',
         ));
       }
     }

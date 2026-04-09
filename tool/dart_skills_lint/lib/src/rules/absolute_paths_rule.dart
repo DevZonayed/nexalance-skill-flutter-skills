@@ -3,13 +3,14 @@ import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
+import '../rules.dart';
 
 /// Enforces that links in SKILL.md do not use absolute paths.
 class AbsolutePathsRule extends SkillRule {
   AbsolutePathsRule({this.severity = AnalysisSeverity.error});
 
   @override
-  final String name = 'check-absolute-paths';
+  final String name = absolutePathsCheck.name;
 
   @override
   final AnalysisSeverity severity;
@@ -24,7 +25,8 @@ class AbsolutePathsRule extends SkillRule {
     // Extract content after YAML frontmatter
     final skillStartRegex = RegExp(r'^---\s*\n(.*?)\n---\s*\n', dotAll: true);
     final RegExpMatch? match = skillStartRegex.firstMatch(context.rawContent);
-    final String markdownContent = match != null ? context.rawContent.substring(match.end) : context.rawContent;
+    final String markdownContent =
+        match != null ? context.rawContent.substring(match.end) : context.rawContent;
 
     for (final RegExpMatch linkMatch in _markdownLinkRegex.allMatches(markdownContent)) {
       final String path = linkMatch.group(1)!;

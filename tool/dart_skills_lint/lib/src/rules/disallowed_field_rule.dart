@@ -3,13 +3,14 @@ import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
+import '../rules.dart';
 
 /// Enforces that only allowed fields are present in YAML metadata.
 class DisallowedFieldRule extends SkillRule {
   DisallowedFieldRule({this.severity = AnalysisSeverity.warning});
 
   @override
-  final String name = 'disallowed-field';
+  final String name = disallowedFieldCheck.name;
 
   @override
   final AnalysisSeverity severity;
@@ -28,7 +29,7 @@ class DisallowedFieldRule extends SkillRule {
   };
 
   static const _skillFileName = 'SKILL.md';
-  static const _metadataUrl = 'https://github.com/flutter/skills#metadata';
+  static const _metadataUrl = 'https://agentskills.io/specification#frontmatter';
 
   @override
   Future<List<ValidationError>> validate(SkillContext context) async {

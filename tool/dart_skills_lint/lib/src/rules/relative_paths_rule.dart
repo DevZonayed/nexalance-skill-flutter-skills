@@ -4,13 +4,14 @@ import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
+import '../rules.dart';
 
 /// Enforces that relative links in SKILL.md point to existing files.
 class RelativePathsRule extends SkillRule {
   RelativePathsRule({this.severity = AnalysisSeverity.error});
 
   @override
-  final String name = 'check-relative-paths';
+  final String name = relativePathsCheck.name;
 
   @override
   final AnalysisSeverity severity;
@@ -25,11 +26,12 @@ class RelativePathsRule extends SkillRule {
     // Extract content after YAML frontmatter
     final skillStartRegex = RegExp(r'^---\s*\n(.*?)\n---\s*\n', dotAll: true);
     final RegExpMatch? match = skillStartRegex.firstMatch(context.rawContent);
-    final String markdownContent = match != null ? context.rawContent.substring(match.end) : context.rawContent;
+    final String markdownContent =
+        match != null ? context.rawContent.substring(match.end) : context.rawContent;
 
     for (final RegExpMatch linkMatch in _markdownLinkRegex.allMatches(markdownContent)) {
       final String path = linkMatch.group(1)!;
-      
+
       // Skip absolute paths (handled by AbsolutePathsRule)
       if (isAbsolute(path) || windows.isAbsolute(path)) {
         continue;

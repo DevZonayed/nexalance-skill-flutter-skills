@@ -13,6 +13,7 @@ import 'package:path/path.dart' as p;
 import 'config_parser.dart';
 import 'models/analysis_severity.dart';
 import 'models/ignore_entry.dart';
+import 'models/skill_rule.dart';
 import 'models/skills_ignores.dart';
 import 'models/validation_error.dart';
 import 'rules.dart';
@@ -180,6 +181,7 @@ Future<bool> validateSkills({
   bool generateBaseline = false,
   String? ignoreFileOverride,
   Configuration? config,
+  List<SkillRule> customRules = const [],
 }) async {
   config ??= Configuration();
   var globalAnyFailed = false;
@@ -215,7 +217,7 @@ Future<bool> validateSkills({
       localIgnoreFile = ignoreFileOverride;
     }
 
-    final validator = Validator(ruleOverrides: localRules);
+    final validator = Validator(ruleOverrides: localRules, customRules: customRules);
 
     final Map<String, List<IgnoreEntry>> ignoresMap =
         await _loadIgnores(localIgnoreFile, skillDir.parent);
@@ -283,7 +285,7 @@ Future<bool> validateSkills({
       localIgnoreFile = ignoreFileOverride;
     }
 
-    final validator = Validator(ruleOverrides: localRules);
+    final validator = Validator(ruleOverrides: localRules, customRules: customRules);
 
     List<FileSystemEntity> entities;
     try {

@@ -5,17 +5,11 @@
 import 'models/analysis_severity.dart';
 import 'models/check_type.dart';
 
-/// URL for frontmatter documentation.
-const metadataUrl = 'https://agentskills.io/specification#frontmatter';
-
 /// Template instance for checking disallowed fields in YAML metadata.
 const disallowedFieldCheck = CheckType(
   name: 'disallowed-field',
   defaultSeverity: AnalysisSeverity.disabled,
 );
-
-/// URL for compatibility field documentation.
-const compatibilityFieldUrl = 'https://agentskills.io/specification#compatibility-field';
 
 /// Template instance for checking if YAML metadata is valid.
 const validYamlMetadataCheck = CheckType(
@@ -23,17 +17,11 @@ const validYamlMetadataCheck = CheckType(
   defaultSeverity: AnalysisSeverity.error,
 );
 
-/// URL for description field documentation.
-const descriptionFieldUrl = 'https://agentskills.io/specification#description-field';
-
 /// Template instance for checking if description is too long.
 const descriptionTooLongCheck = CheckType(
   name: 'description-too-long',
   defaultSeverity: AnalysisSeverity.error,
 );
-
-/// URL for name field documentation.
-const nameFieldUrl = 'https://agentskills.io/specification#name-field';
 
 /// Template instance for checking if skill name is invalid.
 const invalidSkillNameCheck = CheckType(
