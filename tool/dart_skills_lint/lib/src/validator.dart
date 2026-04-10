@@ -56,7 +56,9 @@ class Validator {
     Map<String, AnalysisSeverity>? ruleOverrides,
     List<SkillRule>? customRules,
   })  : _customSeverities = ruleOverrides ?? {},
-        _customRules = customRules ?? [];
+        _customRules = customRules ?? [] {
+    _rules = _buildRules();
+  }
   static const _skillFileName = 'SKILL.md';
 
   /// The name of the special check for missing files or directories.
@@ -64,6 +66,7 @@ class Validator {
 
   final Map<String, AnalysisSeverity> _customSeverities;
   final List<SkillRule> _customRules;
+  late final List<SkillRule> _rules;
 
   AnalysisSeverity _getSeverity(String name, AnalysisSeverity defaultSeverity) {
     return _customSeverities[name] ?? defaultSeverity;
@@ -112,9 +115,7 @@ class Validator {
       yamlParsingError: yamlParsingError,
     );
 
-    final List<SkillRule> rules = _buildRules();
-
-    for (final rule in rules) {
+    for (final SkillRule rule in _rules) {
       final List<ValidationError> errors = await rule.validate(context);
       for (final error in errors) {
         if (error.severity != rule.severity) {

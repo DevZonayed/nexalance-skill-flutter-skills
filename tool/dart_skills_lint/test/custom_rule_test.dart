@@ -105,21 +105,12 @@ Body''');
               'Rule "mismatch-rule" used severity AnalysisSeverity.error instead of defined AnalysisSeverity.warning')));
     });
 
-    test('Validator throws ArgumentError on duplicate rule names', () async {
+    test('Validator throws ArgumentError on duplicate rule names', () {
       final rule1 = CustomRule();
       final rule2 = CustomRule(); // Same name 'custom-rule'
 
-      final validator = Validator(customRules: [rule1, rule2]);
-      final Directory skillDir = await Directory('${tempDir.path}/skill-name-2').create();
-      await File('${skillDir.path}/SKILL.md').writeAsString('''
----
-name: skill-name-2
-description: A test skill
----
-Body''');
-
       expect(
-        () => validator.validate(skillDir),
+        () => Validator(customRules: [rule1, rule2]),
         throwsArgumentError,
       );
     });
