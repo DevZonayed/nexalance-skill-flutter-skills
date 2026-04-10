@@ -18,12 +18,14 @@ class LastModifiedRule extends SkillRule {
 
     final Object? metadata = yaml[_metadataKey];
     if (metadata is! Map || !metadata.containsKey(_lastModifiedKey)) {
-      errors.add(ValidationError(
-        ruleId: name,
-        severity: severity,
-        file: 'SKILL.md',
-        message: 'Missing field: $_metadataKey.$_lastModifiedKey',
-      ));
+      errors.add(
+        ValidationError(
+          ruleId: name,
+          severity: severity,
+          file: 'SKILL.md',
+          message: 'Missing field: $_metadataKey.$_lastModifiedKey',
+        ),
+      );
     }
     return errors;
   }
