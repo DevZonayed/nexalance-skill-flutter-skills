@@ -86,7 +86,7 @@ description: A test skill
 Body''');
 
       final validator = Validator(customRules: [MismatchRule()]);
-      
+
       final logs = <String>[];
       final StreamSubscription<LogRecord> subscription =
           Logger('dart_skills_lint').onRecord.listen((record) {
@@ -99,7 +99,10 @@ Body''');
         await subscription.cancel();
       }
 
-      expect(logs, contains(contains('Rule "mismatch-rule" used severity AnalysisSeverity.error instead of defined AnalysisSeverity.warning')));
+      expect(
+          logs,
+          contains(contains(
+              'Rule "mismatch-rule" used severity AnalysisSeverity.error instead of defined AnalysisSeverity.warning')));
     });
 
     test('Validator throws ArgumentError on duplicate rule names', () async {
