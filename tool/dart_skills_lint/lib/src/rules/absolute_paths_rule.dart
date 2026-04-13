@@ -62,7 +62,8 @@ class AbsolutePathsRule extends SkillRule implements FixableRule {
         final file = File(path);
         if (file.existsSync()) {
           final String relativePath = relative(path, from: directory.path);
-          updatedContent = updatedContent.replaceAll('($path)', '($relativePath)');
+          final String posixRelativePath = relativePath.replaceAll(r'\', '/');
+          updatedContent = updatedContent.replaceAll('($path)', '($posixRelativePath)');
         }
       }
     }
