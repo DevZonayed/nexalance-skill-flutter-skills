@@ -87,14 +87,13 @@ class NameFormatRule extends SkillRule implements FixableRule {
     }
 
     final String dirName = basename(context.directory.path);
-    final String expectedName = getExpectedName(dirName);
-    if (skillName != expectedName) {
+    if (skillName != dirName) {
       errors.add(ValidationError(
         ruleId: name,
         severity: severity,
         file: _skillFileName,
         message:
-            'Skill name ($skillName) must exactly match the expected name derived from its parent directory ($expectedName) (see $_nameFieldUrl)',
+            'Skill name ($skillName) must exactly match the parent directory name ($dirName) (see $_nameFieldUrl)',
       ));
     }
 
@@ -118,10 +117,9 @@ class NameFormatRule extends SkillRule implements FixableRule {
     }
 
     final String dirName = basename(context.directory.path);
-    final String expectedName = getExpectedName(dirName);
 
     final currentName = nameNode.value.toString();
-    if (currentName == expectedName) {
+    if (currentName == dirName) {
       return currentContent;
     }
 
@@ -138,19 +136,12 @@ class NameFormatRule extends SkillRule implements FixableRule {
     final String before = currentContent.substring(0, yamlOffset + span.start.offset);
     final String after = currentContent.substring(yamlOffset + span.end.offset);
 
-    return '$before$expectedName$after';
+    return '$before$dirName$after';
   }
 
   /// Returns the YAML node for the skill name.
   @visibleForTesting
   static YamlNode? getNameNode(YamlMap yaml) {
     return yaml.nodes['name'];
-  }
-
-  /// Returns the expected skill name derived from the directory name.
-  /// Replaces underscores with hyphens.
-  @visibleForTesting
-  static String getExpectedName(String dirName) {
-    return dirName.replaceAll('_', '-');
   }
 }

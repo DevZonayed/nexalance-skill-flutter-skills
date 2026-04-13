@@ -97,13 +97,10 @@ void main() {
         final validator = Validator();
         final ValidationResult result = await validator.validate(skillDir);
         expect(result.isValid, isFalse);
-        expect(
-            result.errors,
-            contains(contains(
-                'must exactly match the expected name derived from its parent directory')));
+        expect(result.errors, contains(contains('must exactly match the parent directory name')));
       });
 
-      test('fixes name to match directory name (replacing underscores)', () async {
+      test('fixes name to match directory name (not replacing underscores)', () async {
         final Directory skillDir = await Directory('${tempDir.path}/my_skill').create();
         final file = File('${skillDir.path}/SKILL.md');
         await file.writeAsString('''
@@ -123,22 +120,7 @@ Body''');
 
         final String fixedContent = await rule.fix('SKILL.md', content, context);
 
-        expect(fixedContent, contains('name: my-skill'));
-      });
-
-      group('getExpectedName', () {
-        test('replaces underscores with hyphens', () {
-          expect(NameFormatRule.getExpectedName('my_skill'), equals('my-skill'));
-          expect(NameFormatRule.getExpectedName('my_skill_name'), equals('my-skill-name'));
-        });
-
-        test('leaves hyphens unchanged', () {
-          expect(NameFormatRule.getExpectedName('my-skill'), equals('my-skill'));
-        });
-
-        test('handles multiple underscores', () {
-          expect(NameFormatRule.getExpectedName('my__skill'), equals('my--skill'));
-        });
+        expect(fixedContent, contains('name: my_skill'));
       });
     });
 
