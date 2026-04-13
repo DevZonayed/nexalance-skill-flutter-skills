@@ -59,7 +59,8 @@ void main() {
       ProcessResult result;
       if (Platform.isWindows) {
         // Use SID *S-1-1-0 (Everyone) to support non-English Windows locales.
-        result = await Process.run('icacls', [file.path, '/inheritance:r', '/deny', '*S-1-1-0:(R)']);
+        result =
+            await Process.run('icacls', [file.path, '/inheritance:r', '/deny', '*S-1-1-0:(R)']);
       } else {
         result = await Process.run('chmod', ['-r', file.path]);
       }
@@ -74,7 +75,8 @@ void main() {
 
         expect(validationResult.isValid, isFalse);
         expect(
-            validationResult.validationErrors.any((e) => e.ruleId == Validator.skillFileInaccessible),
+            validationResult.validationErrors
+                .any((e) => e.ruleId == Validator.skillFileInaccessible),
             isTrue);
       } catch (e, s) {
         fail('Unexpected exception during validation: $e\n$s');
