@@ -1,12 +1,14 @@
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
+import '../fixer.dart';
 import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
 
 /// Enforces constraints on the skill name field.
-class NameFormatRule extends SkillRule {
+class NameFormatRule extends SkillRule implements FixableRule {
   NameFormatRule({this.severity = defaultSeverity});
 
   static const String ruleName = 'invalid-skill-name';
@@ -32,7 +34,7 @@ class NameFormatRule extends SkillRule {
     }
 
     final YamlMap yaml = context.parsedYaml!;
-    final String skillName = yaml['name']?.toString() ?? '';
+    final String skillName = getNameNode(yaml)?.value.toString() ?? '';
 
     if (skillName.isEmpty) {
       return errors; // Handled by required fields check
@@ -85,16 +87,70 @@ class NameFormatRule extends SkillRule {
     }
 
     final String dirName = basename(context.directory.path);
-    if (skillName != dirName) {
+    final String expectedName = getExpectedName(dirName);
+    if (skillName != expectedName) {
       errors.add(ValidationError(
         ruleId: name,
         severity: severity,
         file: _skillFileName,
         message:
-            'Skill name ($skillName) must exactly match the name of its parent directory ($dirName) (see $_nameFieldUrl)',
+            'Skill name ($skillName) must exactly match the expected name derived from its parent directory ($expectedName) (see $_nameFieldUrl)',
       ));
     }
 
     return errors;
+  }
+
+  @override
+  Future<String> fix(String filePath, String currentContent, SkillContext context) async {
+    if (filePath != 'SKILL.md') {
+      return currentContent;
+    }
+
+    if (context.parsedYaml == null) {
+      return currentContent;
+    }
+
+    final YamlMap yaml = context.parsedYaml!;
+    final YamlNode? nameNode = getNameNode(yaml);
+    if (nameNode == null) {
+      return currentContent;
+    }
+
+    final String dirName = basename(context.directory.path);
+    final String expectedName = getExpectedName(dirName);
+
+    final currentName = nameNode.value.toString();
+    if (currentName == expectedName) {
+      return currentContent;
+    }
+
+    final skillStartRegex = RegExp(r'^---\s*\n(.*?)\n---\s*\n', dotAll: true);
+    final RegExpMatch? match = skillStartRegex.firstMatch(currentContent);
+    if (match == null) {
+      return currentContent;
+    }
+    final String yamlStr = match.group(1)!;
+    final int yamlOffset = currentContent.indexOf(yamlStr, match.start);
+
+    // ignore: specify_nonobvious_local_variable_types
+    final span = nameNode.span;
+    final String before = currentContent.substring(0, yamlOffset + span.start.offset);
+    final String after = currentContent.substring(yamlOffset + span.end.offset);
+
+    return '$before$expectedName$after';
+  }
+
+  /// Returns the YAML node for the skill name.
+  @visibleForTesting
+  static YamlNode? getNameNode(YamlMap yaml) {
+    return yaml.nodes['name'];
+  }
+
+  /// Returns the expected skill name derived from the directory name.
+  /// Replaces underscores with hyphens.
+  @visibleForTesting
+  static String getExpectedName(String dirName) {
+    return dirName.replaceAll('_', '-');
   }
 }

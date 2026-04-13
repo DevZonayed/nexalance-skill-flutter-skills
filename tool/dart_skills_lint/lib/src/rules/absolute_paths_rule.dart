@@ -1,11 +1,13 @@
+import 'dart:io';
 import 'package:path/path.dart';
+import '../fixer.dart';
 import '../models/analysis_severity.dart';
 import '../models/skill_context.dart';
 import '../models/skill_rule.dart';
 import '../models/validation_error.dart';
 
 /// Enforces that links in SKILL.md do not use absolute paths.
-class AbsolutePathsRule extends SkillRule {
+class AbsolutePathsRule extends SkillRule implements FixableRule {
   AbsolutePathsRule({this.severity = defaultSeverity});
 
   static const String ruleName = 'check-absolute-paths';
@@ -43,5 +45,28 @@ class AbsolutePathsRule extends SkillRule {
     }
 
     return errors;
+  }
+
+  @override
+  Future<String> fix(String filePath, String currentContent, SkillContext context) async {
+    if (filePath != 'SKILL.md') {
+      return currentContent;
+    }
+
+    final linkRegex = RegExp(r'\[.*?\]\((.*?)\)');
+    var updatedContent = currentContent;
+
+    for (final RegExpMatch match in linkRegex.allMatches(currentContent)) {
+      final String path = match.group(1)!;
+      if (isAbsolute(path) || windows.isAbsolute(path)) {
+        final file = File(path);
+        if (file.existsSync()) {
+          final String relativePath = relative(path, from: context.directory.path);
+          updatedContent = updatedContent.replaceAll('($path)', '($relativePath)');
+        }
+      }
+    }
+
+    return updatedContent;
   }
 }

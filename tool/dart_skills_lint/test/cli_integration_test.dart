@@ -558,5 +558,34 @@ dart_skills_lint:
       final String content = await File('${skillDir.path}/SKILL.md').readAsString();
       expect(content, contains('Line with 1 space \n'));
     });
+
+    test('--fix-apply does not modify file if invalid-skill-name is ignored', () async {
+      final Directory skillDir = await Directory('${tempDir.path}/my_skill').create();
+      await File('${skillDir.path}/SKILL.md').writeAsString('''
+---
+name: wrong-name
+description: A test skill
+---
+Body''');
+
+      final ignoreFile = File('${tempDir.path}/$defaultIgnoreFileName');
+      await ignoreFile.writeAsString(jsonEncode({
+        SkillsIgnores.skillsKey: {
+          'my_skill': [
+            {IgnoreEntry.ruleIdKey: 'invalid-skill-name', IgnoreEntry.fileNameKey: 'SKILL.md'}
+          ]
+        }
+      }));
+
+      final TestProcess process = await TestProcess.start(
+        'dart',
+        ['bin/cli.dart', '-s', skillDir.path, '--fix-apply'],
+      );
+
+      await process.shouldExit(0);
+
+      final String content = await File('${skillDir.path}/SKILL.md').readAsString();
+      expect(content, contains('name: wrong-name'));
+    });
   });
 }
