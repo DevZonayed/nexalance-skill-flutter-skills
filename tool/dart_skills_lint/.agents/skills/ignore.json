@@ -1,14 +1,8 @@
 {
   "skills": {
-    "dart-matcher-best-practices": [
+    "dart-modern-features": [
       {
-        "rule_id": "check-relative-paths",
-        "file_name": "SKILL.md"
-      }
-    ],
-    "dart-test-fundamentals": [
-      {
-        "rule_id": "check-relative-paths",
+        "rule_id": "check-trailing-whitespace",
         "file_name": "SKILL.md"
       }
     ]
