@@ -250,18 +250,6 @@
             *   Web apps read the deep link path from the URL fragment by default, using the pattern `/#/path/to/app/screen`, but this can be changed by configuring the URL strategy.
             *   To configure your Android application to handle deep links, refer to the deep linking documentation.
   resources:
-    - https://pub.dev/documentation/go_router/latest/topics/Get%20started-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Upgrading-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Configuration-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Navigation-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Redirection-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Web-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Deep%20linking-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Transition%20animations-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Type-safe%20routes-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Named%20routes-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/Error%20handling-topic.html
-    - https://pub.dev/documentation/go_router/latest/topics/State%20restoration-topic.html
     - https://docs.flutter.dev/cookbook/animation/page-route-animation
     - https://docs.flutter.dev/cookbook/effects/nested-nav
     - https://docs.flutter.dev/cookbook/navigation/named-routes
@@ -280,3 +268,50 @@
     - https://docs.flutter.dev/ui/navigation
     - https://docs.flutter.dev/ui/navigation/deep-linking
     - https://docs.flutter.dev/ui/navigation/url-strategies
+    - https://pub.dev/documentation/go_router/latest/topics/Configuration-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Deep%20linking-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Error%20handling-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Get%20started-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Named%20routes-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Navigation-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Redirection-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/State%20restoration-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Transition%20animations-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Type-safe%20routes-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Upgrading-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Web-topic.html
+- name: flutter-add-widget-test
+  description: Implement a component-level test using `WidgetTester` to verify
+    UI rendering and user interactions (tapping, scrolling, entering text). Use
+    when validating that a specific widget displays correct data and responds to
+    events as expected.
+  instructions: |
+    1.  **Add the `flutter_test` dependency**. This dependency should be included in the `dev_dependencies` section of your `pubspec.yaml` file. If you created your Flutter project using command-line tools or a code editor, this dependency might already be present.
+    2.  **Create the widget to test**. For example, you might create a widget that displays a title and a message.
+    3.  **Create a `testWidgets` test**. Use the `testWidgets()` function from the `flutter_test` package to define your test. This function automatically provides a `WidgetTester` for each test case. The `WidgetTester` allows you to build and interact with widgets in the test environment.
+    4.  **Build the widget using the `WidgetTester`**. Use the `pumpWidget()` method provided by `WidgetTester` to build and render your widget within the test environment. For instance, you can create an instance of `MyWidget` with specific title and message values. After the initial `pumpWidget()` call, `WidgetTester` offers additional methods like `tester.pump()` to rebuild the widget, which is useful for `StatefulWidget`s or animations where Flutter doesn't automatically rebuild after state changes in the test environment.
+    5.  **Search for the widget using a `Finder`**. `Finder` classes allow you to locate widgets in the test environment. For example, you can use `find.text('Your Text')` to find a `Text` widget.
+    6.  **Verify the widget using a `Matcher`**. Widget-specific `Matcher` constants help confirm whether a `Finder` successfully locates a widget or multiple widgets. For example, `findsOneWidget` can verify that a `Text` widget appears exactly once in the widget tree. You can also use `matchesGoldenFile` to verify that a widget's rendering matches a specific bitmap image (golden file testing).
+    7.  **Simulate user interactions**. The `WidgetTester` provides methods for simulating interactions like entering text, tapping, and dragging.
+        *   To enter text, use `enterText()`.
+        *   To tap, use `tap()`.
+        *   To drag, use `drag()`.
+        *   To handle scrolling, the `WidgetTester` class provides the `scrollUntilVisible()` method, which scrolls until a specific widget is visible. This is useful when the height of items in a list can vary.
+    8.  **Rebuild the widget tree after interactions**. Since Flutter doesn't automatically rebuild widgets in the test environment after user interactions update the app's state, you need to call `pump()` or `pumpAndSettle()` methods provided by the `WidgetTester` to ensure the widget tree is rebuilt.
+    9.  **Run the tests**. Execute the tests using the command `flutter test test/widget_test.dart` from the root of your project.
+
+    A widget test (also known as a component test in other UI frameworks) aims to verify that a single widget's UI looks and interacts as expected. It involves multiple classes and requires a test environment that provides the appropriate widget lifecycle context. Widget tests are more comprehensive than unit tests because the widget being tested can receive user actions, perform layout, and instantiate child widgets. However, like unit tests, the widget test environment is a simpler implementation than a full UI system.
+  resources:
+    - https://docs.flutter.dev/app-architecture/case-study/testing
+    - https://docs.flutter.dev/cookbook/testing/integration/introduction
+    - https://docs.flutter.dev/cookbook/testing/unit/introduction
+    - https://docs.flutter.dev/cookbook/testing/widget/introduction
+    - https://docs.flutter.dev/cookbook/testing/widget/orientation
+    - https://docs.flutter.dev/cookbook/testing/widget/scrolling
+    - https://docs.flutter.dev/cookbook/testing/widget/tap-drag
+    - https://docs.flutter.dev/get-started/fundamentals/user-input
+    - https://docs.flutter.dev/release/breaking-changes/mock-platform-channels
+    - https://docs.flutter.dev/testing
+    - https://docs.flutter.dev/testing/integration-tests
+    - https://docs.flutter.dev/testing/overview
+    - https://docs.flutter.dev/testing/testing-plugins
