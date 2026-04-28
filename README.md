@@ -9,7 +9,7 @@ This repository contains agent skills for Flutter.
 To install the skills into your project, run the following command:
 
 ```bash
-npx skills add flutter/skills --all
+npx skills add flutter/skills --skill '*' --agent universal
 ```
 
 ## Updating Skills
