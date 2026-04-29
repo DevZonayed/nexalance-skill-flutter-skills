@@ -4,7 +4,7 @@
 
 Agent skills for Flutter, maintained by the Flutter team.
 
-You can also install the [Agent Skills for Dart]([url](https://github.com/dart-lang/skills)) for Dart tasks.
+You can also install the [Agent Skills for Dart](https://github.com/dart-lang/skills) for Dart tasks.
 
 ## Installation
 
