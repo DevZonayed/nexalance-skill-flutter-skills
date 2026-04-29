@@ -1,6 +1,4 @@
-# Agent Skills for Flutter
-
-**NOTE: This repository is currently in development and is not yet ready for use.**
+# Flutter Agent Skills
 
 Agent skills for Flutter, maintained by the Flutter team.
 
@@ -41,7 +39,7 @@ npx skills update
 | [flutter-use-http-package](skills/flutter-use-http-package/SKILL.md) | Use the `http` package to execute GET, POST, PUT, or DELETE requests. Use when you need to fetch from or send data to a REST API. |
 ## Contributing
 
-To contribute skills, see the instructions in [tool/generator/README.md](tool/generator/README.md).
+We aren't accepting pull requests at this time, but we would love to hear your feedback! 
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
