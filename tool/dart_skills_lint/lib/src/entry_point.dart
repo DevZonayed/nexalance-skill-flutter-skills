@@ -208,7 +208,7 @@ ArgParser _createArgParser(String helpFlag) {
 
 Future<Configuration?> _loadConfig(ArgResults results) async {
   final ignoreConfig = results[_ignoreConfigFlag] as bool;
-  final Configuration config = ignoreConfig ? Configuration() : await loadConfig();
+  final Configuration config = ignoreConfig ? Configuration() : await ConfigParser.loadConfig();
   if (ignoreConfig && !(results[_quietFlag] as bool)) {
     _log.info('Ignoring configuration file due to $_ignoreConfigFlag flag');
   }
@@ -257,7 +257,7 @@ Future<bool> validateSkills({
   String? ignoreFileOverride,
   Configuration? config,
   List<SkillRule> customRules = const [],
-}) async {
+}) {
   return validateSkillsInternal(
     skillDirPaths: skillDirPaths,
     individualSkillPaths: individualSkillPaths,
@@ -295,10 +295,7 @@ Future<bool> validateSkillsInternal({
   var anySkillsValidated = false;
 
   // 1. Process individual --skill (-s) paths
-  final (
-    bool individualSkillsFailed,
-    bool individualSkillsValidated,
-  ) = await _processSkillPaths(
+  final (bool individualSkillsFailed, bool individualSkillsValidated) = await _processSkillPaths(
     individualSkillPaths: individualSkillPaths,
     quiet: quiet,
     config: config,
@@ -646,7 +643,7 @@ Future<Map<String, List<IgnoreEntry>>> _loadIgnores(
   return {};
 }
 
-void _applyIgnores(ValidationResult result, List<IgnoreEntry> ignores, Directory skillDir) {
+void _applyIgnores(ValidationResult result, List<IgnoreEntry> ignores) {
   for (final ValidationError error in result.validationErrors) {
     if (error.isIgnored) {
       continue;
@@ -675,7 +672,7 @@ Future<ValidationResult> _validateSingleSkill({
   }
   final ValidationResult result = await validator.validate(skillDir);
   final List<IgnoreEntry> skillIgnores = ignoresMap[skillName] ?? [];
-  _applyIgnores(result, skillIgnores, skillDir);
+  _applyIgnores(result, skillIgnores);
   _printValidationResult(result, printWarnings, quiet);
   return result;
 }
@@ -715,7 +712,7 @@ Future<ValidationResult> _applyFixesIfNeeded({
       );
       if (hasErrors) {
         try {
-          final String newContent = await (rule as FixableRule).fix(
+          final String newContent = await rule.fix(
             SkillContext.skillFileName,
             currentContent,
             context.directory,
@@ -738,7 +735,7 @@ Future<ValidationResult> _applyFixesIfNeeded({
         _log.info('  Applied fixes for $skillName');
       }
       final ValidationResult newResult = await validator.validate(skillDir);
-      _applyIgnores(newResult, skillIgnores, skillDir);
+      _applyIgnores(newResult, skillIgnores);
       return newResult;
     } else if (fix) {
       if (!quiet) {

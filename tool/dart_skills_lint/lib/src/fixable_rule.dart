@@ -3,10 +3,11 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:io';
+import 'models/skill_rule.dart';
 
 /// Interface for rules that support fixes.
 /// Kept internal to the package for now.
-abstract class FixableRule {
+abstract class FixableRule extends SkillRule {
   /// Returns the updated content of the file at [filePath].
   /// [currentContent] is the content after previous fixes have been applied.
   /// If the rule does not support fixing the file at [filePath], it should return [currentContent].

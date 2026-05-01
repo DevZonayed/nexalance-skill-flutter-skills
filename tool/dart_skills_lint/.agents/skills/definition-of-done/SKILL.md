@@ -11,17 +11,17 @@ Use this skill to ensure that all work meets the repository standards before dec
 
 Before stating that a task is complete, you MUST execute and pass the following checks:
 
-1.  **Formatting**: Run `dart format .` and ensure all files are formatted correctly.
+1.  **Formatting**: Run `dart format .` to format files, or `dart format --output=none --set-exit-if-changed .` to check without modifying. Ensure all files are formatted correctly.
 2.  **Analysis**: Run `dart analyze --fatal-infos` and ensure there are zero issues (including info-level issues).
-3.  **Metrics**: Run `dart run dart_code_linter:metrics analyze lib` and ensure there are zero issues.
+3.  **Metrics/Linter**: Run `dart run dart_code_linter:metrics analyze lib` and ensure there are zero issues. This checks for cyclomatic complexity and custom rules like file naming and redundant async.
 4.  **Tests**: Run `dart test` and ensure all tests pass successfully.
 5.  **Skill Validation**: If any skill files were modified, run `dart run dart_skills_lint -d .agents/skills` to ensure they are valid.
 
 ## 🚦 Completion Checklist
 
-- [ ] Code is formatted (`dart format .`).
+- [ ] Code is formatted (`dart format .` or checked with `--output=none --set-exit-if-changed .`).
 - [ ] Analysis is clean (`dart analyze --fatal-infos`).
-- [ ] Metrics are clean (`dart run dart_code_linter:metrics analyze lib`).
+- [ ] Metrics/Linter are clean (`dart run dart_code_linter:metrics analyze lib`).
 - [ ] Tests are passing (`dart test`).
 - [ ] Skills validated if modified (`dart run dart_skills_lint -d .agents/skills`).
 - [ ] Documentation is updated.

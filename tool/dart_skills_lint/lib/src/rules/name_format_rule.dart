@@ -125,7 +125,7 @@ class NameFormatRule extends SkillRule implements FixableRule {
     }
     final String yamlStr = match.group(1)!;
 
-    final dynamic yamlObj;
+    final Object? yamlObj;
     try {
       yamlObj = loadYaml(yamlStr);
     } catch (e) {
