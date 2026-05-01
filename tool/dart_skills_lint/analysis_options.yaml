@@ -271,6 +271,3 @@ linter:
 dart_code_linter:
   metrics:
     cyclomatic-complexity: 20
-  metrics-exclude:
-    - lib/src/entry_point.dart
-    - lib/src/config_parser.dart
