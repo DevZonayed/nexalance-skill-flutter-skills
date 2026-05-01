@@ -11,26 +11,120 @@ import 'models/analysis_severity.dart';
 
 final _log = Logger('dart_skills_lint');
 
-const _dartSkillsLintKey = 'dart_skills_lint';
-const _rulesKey = 'rules';
-const _directoriesKey = 'directories';
-const _pathKey = 'path';
-const _ignoreFileKey = 'ignore_file';
+class ConfigParser {
+  static const _dartSkillsLintKey = 'dart_skills_lint';
+  static const _rulesKey = 'rules';
+  static const _directoriesKey = 'directories';
+  static const _pathKey = 'path';
+  static const _ignoreFileKey = 'ignore_file';
 
-const Set<String> _allowedTopLevelKeys = {_rulesKey, _directoriesKey};
-const Set<String> _allowedDirectoryKeys = {_pathKey, _rulesKey, _ignoreFileKey};
+  static const Set<String> _allowedTopLevelKeys = {_rulesKey, _directoriesKey};
+  static const Set<String> _allowedDirectoryKeys = {_pathKey, _rulesKey, _ignoreFileKey};
 
-AnalysisSeverity _parseSeverity(String value) {
-  if (value == 'error') {
-    return AnalysisSeverity.error;
+  static AnalysisSeverity _parseSeverity(String value) {
+    if (value == 'error') {
+      return AnalysisSeverity.error;
+    }
+    if (value == 'warning') {
+      return AnalysisSeverity.warning;
+    }
+    if (value == 'disabled') {
+      return AnalysisSeverity.disabled;
+    }
+    return AnalysisSeverity.disabled; // Default if unknown
   }
-  if (value == 'warning') {
-    return AnalysisSeverity.warning;
+
+  /// Reads dart_skills_lint.yaml from the current directory and returns the configuration.
+  static Future<Configuration> loadConfig() async {
+    final configFile = File('dart_skills_lint.yaml');
+    if (!configFile.existsSync()) {
+      return Configuration();
+    }
+
+    try {
+      final String content = await configFile.readAsString();
+      final yaml = loadYaml(content);
+      if (yaml is YamlMap && yaml.containsKey(_dartSkillsLintKey)) {
+        final toolConfig = yaml[_dartSkillsLintKey];
+        if (toolConfig is YamlMap) {
+          final parsingErrors = <String>[];
+
+          _validateTopLevelKeys(toolConfig, parsingErrors);
+          final configuredRules = _parseRules(toolConfig);
+          final directoryConfigs = _parseDirectories(toolConfig, parsingErrors);
+          return Configuration(
+            directoryConfigs: directoryConfigs,
+            configuredRules: configuredRules,
+            parsingErrors: parsingErrors,
+          );
+        }
+      }
+    } catch (e) {
+      _log.warning('Failed to parse dart_skills_lint.yaml: $e');
+    }
+    return Configuration();
   }
-  if (value == 'disabled') {
-    return AnalysisSeverity.disabled;
+
+  /// Validates that all keys at the top level of the `dart_skills_lint` configuration map are recognized.
+  /// Appends error messages to `parsingErrors` for any unrecognized keys.
+  static void _validateTopLevelKeys(YamlMap toolConfig, List<String> parsingErrors) {
+    for (final key in toolConfig.keys) {
+      if (!_allowedTopLevelKeys.contains(key.toString())) {
+        parsingErrors.add('Unrecognized top-level key "$key" in dart_skills_lint configuration.');
+      }
+    }
   }
-  return AnalysisSeverity.disabled; // Default if unknown
+
+  /// Parses the global rules configuration from the `dart_skills_lint` map.
+  /// Returns a map of rule names to their resolved `AnalysisSeverity`.
+  static Map<String, AnalysisSeverity> _parseRules(YamlMap toolConfig) {
+    final configuredRules = <String, AnalysisSeverity>{};
+    if (toolConfig.containsKey(_rulesKey)) {
+      final rules = toolConfig[_rulesKey];
+      if (rules is YamlMap) {
+        for (final key in rules.keys) {
+          configuredRules[key.toString()] = _parseSeverity(rules[key]?.toString() ?? '');
+        }
+      }
+    }
+    return configuredRules;
+  }
+
+  /// Parses the `directories` list from the configuration.
+  /// Validates keys for each directory entry and resolves path-specific rule overrides.
+  /// Appends any parsing errors to `parsingErrors`.
+  static List<DirectoryConfig> _parseDirectories(YamlMap toolConfig, List<String> parsingErrors) {
+    final directoryConfigs = <DirectoryConfig>[];
+    if (toolConfig.containsKey(_directoriesKey)) {
+      final dirs = toolConfig[_directoriesKey];
+      if (dirs is YamlList) {
+        for (final dir in dirs) {
+          if (dir is YamlMap && dir.containsKey(_pathKey)) {
+            final path = dir[_pathKey] as String;
+
+            for (final key in dir.keys) {
+              if (!_allowedDirectoryKeys.contains(key.toString())) {
+                parsingErrors.add('Unrecognized key "$key" in directory entry for "$path".');
+              }
+            }
+
+            final rules = <String, AnalysisSeverity>{};
+            if (dir.containsKey(_rulesKey)) {
+              final localRules = dir[_rulesKey];
+              if (localRules is YamlMap) {
+                for (final key in localRules.keys) {
+                  rules[key.toString()] = _parseSeverity(localRules[key]?.toString() ?? '');
+                }
+              }
+            }
+            final ignoreFile = dir[_ignoreFileKey] as String?;
+            directoryConfigs.add(DirectoryConfig(path: path, rules: rules, ignoreFile: ignoreFile));
+          }
+        }
+      }
+    }
+    return directoryConfigs;
+  }
 }
 
 /// Configuration for a specific directory containing skills.
@@ -59,83 +153,4 @@ class Configuration {
   final List<DirectoryConfig> directoryConfigs;
   final Map<String, AnalysisSeverity> configuredRules;
   final List<String> parsingErrors;
-}
-
-/// Reads dart_skills_lint.yaml from the current directory and returns the configuration.
-Future<Configuration> loadConfig() async {
-  final configFile = File('dart_skills_lint.yaml');
-  if (!configFile.existsSync()) {
-    return Configuration();
-  }
-
-  try {
-    final String content = await configFile.readAsString();
-    final yaml = loadYaml(content);
-    if (yaml is YamlMap && yaml.containsKey(_dartSkillsLintKey)) {
-      final toolConfig = yaml[_dartSkillsLintKey];
-      if (toolConfig is YamlMap) {
-        final parsingErrors = <String>[];
-
-        // Validate top-level keys
-        for (final key in toolConfig.keys) {
-          if (!_allowedTopLevelKeys.contains(key.toString())) {
-            parsingErrors.add(
-              'Unrecognized top-level key "$key" in dart_skills_lint configuration.',
-            );
-          }
-        }
-
-        final configuredRules = <String, AnalysisSeverity>{};
-        if (toolConfig.containsKey(_rulesKey)) {
-          final rules = toolConfig[_rulesKey];
-          if (rules is YamlMap) {
-            for (final key in rules.keys) {
-              configuredRules[key.toString()] = _parseSeverity(rules[key]?.toString() ?? '');
-            }
-          }
-        }
-
-        final directoryConfigs = <DirectoryConfig>[];
-        if (toolConfig.containsKey(_directoriesKey)) {
-          final dirs = toolConfig[_directoriesKey];
-          if (dirs is YamlList) {
-            for (final dir in dirs) {
-              if (dir is YamlMap && dir.containsKey(_pathKey)) {
-                final path = dir[_pathKey] as String;
-
-                // Validate directory keys
-                for (final key in dir.keys) {
-                  if (!_allowedDirectoryKeys.contains(key.toString())) {
-                    parsingErrors.add('Unrecognized key "$key" in directory entry for "$path".');
-                  }
-                }
-
-                final rules = <String, AnalysisSeverity>{};
-                if (dir.containsKey(_rulesKey)) {
-                  final localRules = dir[_rulesKey];
-                  if (localRules is YamlMap) {
-                    for (final key in localRules.keys) {
-                      rules[key.toString()] = _parseSeverity(localRules[key]?.toString() ?? '');
-                    }
-                  }
-                }
-                final ignoreFile = dir[_ignoreFileKey] as String?;
-                directoryConfigs.add(
-                  DirectoryConfig(path: path, rules: rules, ignoreFile: ignoreFile),
-                );
-              }
-            }
-          }
-        }
-        return Configuration(
-          directoryConfigs: directoryConfigs,
-          configuredRules: configuredRules,
-          parsingErrors: parsingErrors,
-        );
-      }
-    }
-  } catch (e) {
-    _log.warning('Failed to parse dart_skills_lint.yaml: $e');
-  }
-  return Configuration();
 }

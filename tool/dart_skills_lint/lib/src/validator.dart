@@ -19,48 +19,11 @@ const _dirStructureUrl = 'https://agentskills.io/specification#directory-structu
 
 final _log = Logger('dart_skills_lint');
 
-/// The result of a skill directory validation attempt.
-class ValidationResult {
-  ValidationResult({
-    this.validationErrors = const [],
-    List<String> warnings = const [],
-    this.context,
-  }) : _manualWarnings = warnings;
-
-  /// The context used during validation.
-  final SkillContext? context;
-
-  /// Whether the skill directory is valid according to the specification.
-  bool get isValid =>
-      !validationErrors.any((e) => e.severity == AnalysisSeverity.error && !e.isIgnored);
-
-  /// A list of structured validation errors found.
-  final List<ValidationError> validationErrors;
-
-  final List<String> _manualWarnings;
-
-  /// A list of error messages for failing checks (excluding ignored ones).
-  List<String> get errors => validationErrors
-      .where((e) => e.severity == AnalysisSeverity.error && !e.isIgnored)
-      .map((e) => e.message)
-      .toList();
-
-  /// A list of warning messages for suboptimal setups or recommendations.
-  List<String> get warnings => [
-    ..._manualWarnings,
-    ...validationErrors
-        .where((e) => e.severity == AnalysisSeverity.warning && !e.isIgnored)
-        .map((e) => e.message),
-  ];
-}
-
 /// Validates agent skill directories against the Agent Skills specification.
 class Validator {
   Validator({Map<String, AnalysisSeverity>? ruleOverrides, List<SkillRule>? customRules})
     : _customSeverities = ruleOverrides ?? {},
-      _customRules = customRules ?? [] {
-    _rules = _buildRules();
-  }
+      _rules = _buildRules(ruleOverrides ?? {}, customRules ?? []);
   static const String _skillFileName = SkillContext.skillFileName;
 
   /// The name of the special check for missing files or directories.
@@ -73,8 +36,7 @@ class Validator {
   static const String unexpectedError = 'unexpected-error';
 
   final Map<String, AnalysisSeverity> _customSeverities;
-  final List<SkillRule> _customRules;
-  late final List<SkillRule> _rules;
+  final List<SkillRule> _rules;
 
   /// Returns the rules used by this validator.
   List<SkillRule> get rules => _rules;
@@ -162,7 +124,10 @@ class Validator {
     return ValidationResult(validationErrors: validationErrors, context: context);
   }
 
-  List<SkillRule> _buildRules() {
+  static List<SkillRule> _buildRules(
+    Map<String, AnalysisSeverity> customSeverities,
+    List<SkillRule> customRules,
+  ) {
     final rules = <SkillRule>[];
     final seenNames = <String>{};
 
@@ -177,14 +142,14 @@ class Validator {
     }
 
     for (final CheckType check in RuleRegistry.allChecks) {
-      final AnalysisSeverity severity = _getSeverity(check.name, check.defaultSeverity);
+      final AnalysisSeverity severity = customSeverities[check.name] ?? check.defaultSeverity;
       final SkillRule? rule = RuleRegistry.createRule(check.name, severity);
       if (rule != null) {
         addRule(rule);
       }
     }
 
-    _customRules.forEach(addRule);
+    customRules.forEach(addRule);
 
     return rules;
   }
@@ -235,4 +200,39 @@ class Validator {
     }
     return true;
   }
+}
+
+/// The result of a skill directory validation attempt.
+class ValidationResult {
+  ValidationResult({
+    this.validationErrors = const [],
+    List<String> warnings = const [],
+    this.context,
+  }) : _manualWarnings = warnings;
+
+  /// The context used during validation.
+  final SkillContext? context;
+
+  /// Whether the skill directory is valid according to the specification.
+  bool get isValid =>
+      !validationErrors.any((e) => e.severity == AnalysisSeverity.error && !e.isIgnored);
+
+  /// A list of structured validation errors found.
+  final List<ValidationError> validationErrors;
+
+  final List<String> _manualWarnings;
+
+  /// A list of error messages for failing checks (excluding ignored ones).
+  List<String> get errors => validationErrors
+      .where((e) => e.severity == AnalysisSeverity.error && !e.isIgnored)
+      .map((e) => e.message)
+      .toList();
+
+  /// A list of warning messages for suboptimal setups or recommendations.
+  List<String> get warnings => [
+    ..._manualWarnings,
+    ...validationErrors
+        .where((e) => e.severity == AnalysisSeverity.warning && !e.isIgnored)
+        .map((e) => e.message),
+  ];
 }

@@ -69,60 +69,7 @@ Future<void> runApp(List<String> args) async {
 
   const helpFlag = 'help';
 
-  final parser = ArgParser()
-    ..addFlag(helpFlag, abbr: 'h', negatable: false, help: 'Show usage information.')
-    ..addFlag(_printWarningsFlag, abbr: 'w', defaultsTo: true, help: 'Print validation warnings.');
-
-  // Dynamically add flags for all registered rules.
-  for (final CheckType check in RuleRegistry.allChecks) {
-    parser.addFlag(
-      check.name,
-      defaultsTo: check.defaultSeverity != AnalysisSeverity.disabled,
-      help: check.help,
-    );
-  }
-
-  parser
-    ..addFlag(
-      _fastFailFlag,
-      negatable: false,
-      help: 'Fail immediately on the first skill validation error.',
-    )
-    ..addFlag(
-      _quietFlag,
-      abbr: 'q',
-      negatable: false,
-      help: 'Quiet mode (only print errors and warnings).',
-    )
-    ..addMultiOption(
-      _skillsDirectoryFlag,
-      abbr: 'd',
-      help: 'Path to a skills directory to validate. Can be specified multiple times.',
-    )
-    ..addMultiOption(
-      _skillOption,
-      abbr: 's',
-      help: 'Path to an individual skill directory to validate. Can be specified multiple times.',
-    )
-    ..addOption(_ignoreFileOption, help: 'Path to a JSON file listing lints to ignore for the run.')
-    ..addFlag(
-      _generateBaselineFlag,
-      negatable: false,
-      help: 'Write all current errors into $defaultIgnoreFileName to ignore on future runs.',
-    )
-    ..addFlag(
-      _ignoreConfigFlag,
-      negatable: false,
-      help: 'Ignore the YAML configuration file entirely.',
-    )
-    ..addFlag(_fixFlag, negatable: false, help: 'Preview fixes for failing lints (dry run).')
-    ..addFlag(_fixApplyFlag, negatable: false, help: 'Apply fixes for failing lints.')
-    ..addFlag(
-      _allowMisconfiguredKeysFlag,
-      negatable: false,
-      hide: true,
-      help: 'Allow misconfigured keys in dart_skills_lint.yaml.',
-    );
+  final ArgParser parser = _createArgParser(helpFlag);
 
   final ArgResults results;
   try {
@@ -137,26 +84,10 @@ Future<void> runApp(List<String> args) async {
     return;
   }
 
-  final ignoreConfig = results[_ignoreConfigFlag] as bool;
-  final Configuration config = ignoreConfig ? Configuration() : await loadConfig();
-  if (ignoreConfig && !(results[_quietFlag] as bool)) {
-    _log.info('Ignoring configuration file due to $_ignoreConfigFlag flag');
-  }
-
-  if (config.parsingErrors.isNotEmpty) {
-    final allowMisconfiguredKeys = results[_allowMisconfiguredKeysFlag] as bool;
-    if (allowMisconfiguredKeys) {
-      for (final String error in config.parsingErrors) {
-        _log.warning('Configuration warning: $error');
-      }
-    } else {
-      for (final String error in config.parsingErrors) {
-        _log.severe('Configuration error: $error');
-      }
-      _log.severe('Use --$_allowMisconfiguredKeysFlag to ignore these errors.');
-      exitCode = 1;
-      return;
-    }
+  final Configuration? config = await _loadConfig(results);
+  if (config == null) {
+    exitCode = 1;
+    return;
   }
 
   var skillDirPaths = results[_skillsDirectoryFlag] as List<String>;
@@ -213,6 +144,92 @@ Future<void> runApp(List<String> args) async {
   exitCode = success ? 0 : 1;
 }
 
+/// Creates the [ArgParser] for the CLI, adding all supported flags and options.
+///
+/// Dynamically adds flags for all registered rules in [RuleRegistry].
+ArgParser _createArgParser(String helpFlag) {
+  final parser = ArgParser()
+    ..addFlag(helpFlag, abbr: 'h', negatable: false, help: 'Show usage information.')
+    ..addFlag(_printWarningsFlag, abbr: 'w', defaultsTo: true, help: 'Print validation warnings.');
+
+  // Dynamically add flags for all registered rules.
+  for (final CheckType check in RuleRegistry.allChecks) {
+    parser.addFlag(
+      check.name,
+      defaultsTo: check.defaultSeverity != AnalysisSeverity.disabled,
+      help: check.help,
+    );
+  }
+
+  parser
+    ..addFlag(
+      _fastFailFlag,
+      negatable: false,
+      help: 'Fail immediately on the first skill validation error.',
+    )
+    ..addFlag(
+      _quietFlag,
+      abbr: 'q',
+      negatable: false,
+      help: 'Quiet mode (only print errors and warnings).',
+    )
+    ..addMultiOption(
+      _skillsDirectoryFlag,
+      abbr: 'd',
+      help: 'Path to a skills directory to validate. Can be specified multiple times.',
+    )
+    ..addMultiOption(
+      _skillOption,
+      abbr: 's',
+      help: 'Path to an individual skill directory to validate. Can be specified multiple times.',
+    )
+    ..addOption(_ignoreFileOption, help: 'Path to a JSON file listing lints to ignore for the run.')
+    ..addFlag(
+      _generateBaselineFlag,
+      negatable: false,
+      help: 'Write all current errors into $defaultIgnoreFileName to ignore on future runs.',
+    )
+    ..addFlag(
+      _ignoreConfigFlag,
+      negatable: false,
+      help: 'Ignore the YAML configuration file entirely.',
+    )
+    ..addFlag(_fixFlag, negatable: false, help: 'Preview fixes for failing lints (dry run).')
+    ..addFlag(_fixApplyFlag, negatable: false, help: 'Apply fixes for failing lints.')
+    ..addFlag(
+      _allowMisconfiguredKeysFlag,
+      negatable: false,
+      hide: true,
+      help: 'Allow misconfigured keys in dart_skills_lint.yaml.',
+    );
+
+  return parser;
+}
+
+Future<Configuration?> _loadConfig(ArgResults results) async {
+  final ignoreConfig = results[_ignoreConfigFlag] as bool;
+  final Configuration config = ignoreConfig ? Configuration() : await ConfigParser.loadConfig();
+  if (ignoreConfig && !(results[_quietFlag] as bool)) {
+    _log.info('Ignoring configuration file due to $_ignoreConfigFlag flag');
+  }
+
+  if (config.parsingErrors.isNotEmpty) {
+    final allowMisconfiguredKeys = results[_allowMisconfiguredKeysFlag] as bool;
+    if (allowMisconfiguredKeys) {
+      for (final String error in config.parsingErrors) {
+        _log.warning('Configuration warning: $error');
+      }
+    } else {
+      for (final String error in config.parsingErrors) {
+        _log.severe('Configuration error: $error');
+      }
+      _log.severe('Use --$_allowMisconfiguredKeysFlag to ignore these errors.');
+      return null;
+    }
+  }
+  return config;
+}
+
 /// Validates skills based on the provided configuration.
 ///
 /// This is the public API for validating skills. It does not support fixing
@@ -240,7 +257,7 @@ Future<bool> validateSkills({
   String? ignoreFileOverride,
   Configuration? config,
   List<SkillRule> customRules = const [],
-}) async {
+}) {
   return validateSkillsInternal(
     skillDirPaths: skillDirPaths,
     individualSkillPaths: individualSkillPaths,
@@ -278,6 +295,85 @@ Future<bool> validateSkillsInternal({
   var anySkillsValidated = false;
 
   // 1. Process individual --skill (-s) paths
+  final ({bool globalAnyFailed, bool anySkillsValidated}) result = await _processSkillPaths(
+    individualSkillPaths: individualSkillPaths,
+    quiet: quiet,
+    config: config,
+    resolvedRules: resolvedRules,
+    ignoreFileOverride: ignoreFileOverride,
+    customRules: customRules,
+    printWarnings: printWarnings,
+    generateBaseline: generateBaseline,
+    fix: fix,
+    fixApply: fixApply,
+    fastFail: fastFail,
+  );
+  globalAnyFailed = result.globalAnyFailed;
+  anySkillsValidated = result.anySkillsValidated;
+
+  if (globalAnyFailed && fastFail) {
+    return false;
+  }
+
+  // 2. Process --skills-directory (-d) roots
+  final ({bool globalAnyFailed, bool anySkillsValidated}) dirResult =
+      await _processSkillDirectories(
+        skillDirPaths: skillDirPaths,
+        quiet: quiet,
+        config: config,
+        resolvedRules: resolvedRules,
+        ignoreFileOverride: ignoreFileOverride,
+        customRules: customRules,
+        printWarnings: printWarnings,
+        generateBaseline: generateBaseline,
+        fix: fix,
+        fixApply: fixApply,
+        fastFail: fastFail,
+      );
+  globalAnyFailed = globalAnyFailed || dirResult.globalAnyFailed;
+  anySkillsValidated = anySkillsValidated || dirResult.anySkillsValidated;
+
+  if (!anySkillsValidated) {
+    var foundSingleSkillPassedToD = false;
+    for (final rootPath in skillDirPaths) {
+      final String expandedRootPath = _expandPath(rootPath);
+      final skillMdFile = File(p.join(expandedRootPath, SkillContext.skillFileName));
+      if (skillMdFile.existsSync()) {
+        _log.severe(
+          'Directory "$expandedRootPath" appears to be an individual skill. Use --skill / -s instead of -d / --skills-directory.',
+        );
+        foundSingleSkillPassedToD = true;
+      }
+    }
+    if (!foundSingleSkillPassedToD) {
+      _log.severe('No skills found to validate in the specified directories.');
+    }
+    globalAnyFailed = true;
+  }
+
+  if (generateBaseline) {
+    globalAnyFailed = false;
+  }
+
+  return !globalAnyFailed;
+}
+
+Future<({bool globalAnyFailed, bool anySkillsValidated})> _processSkillPaths({
+  required List<String> individualSkillPaths,
+  required bool quiet,
+  required Configuration config,
+  required Map<String, AnalysisSeverity> resolvedRules,
+  required String? ignoreFileOverride,
+  required List<SkillRule> customRules,
+  required bool printWarnings,
+  required bool generateBaseline,
+  required bool fix,
+  required bool fixApply,
+  required bool fastFail,
+}) async {
+  var globalAnyFailed = false;
+  var anySkillsValidated = false;
+
   for (final skillPath in individualSkillPaths) {
     final String normalizedSkillPath = p.normalize(_expandPath(skillPath));
     if (!quiet) {
@@ -312,27 +408,18 @@ Future<bool> validateSkillsInternal({
     final List<IgnoreEntry> skillIgnores = ignoresMap[skillName] ?? [];
 
     anySkillsValidated = true;
-    final ValidationResult result = await _validateSingleSkill(
+    final ValidationResult finalResult = await _runValidationWorkflow(
       skillDir: skillDir,
       validator: validator,
       ignoresMap: ignoresMap,
       printWarnings: printWarnings,
       quiet: quiet,
-    );
-
-    final ValidationResult finalResult = await _applyFixesIfNeeded(
-      skillDir: skillDir,
-      result: result,
-      validator: validator,
-      skillIgnores: skillIgnores,
+      generateBaseline: generateBaseline,
       fix: fix,
       fixApply: fixApply,
-      quiet: quiet,
+      localIgnoreFile: localIgnoreFile,
+      baselineRootDir: skillDir.parent,
     );
-
-    if (generateBaseline) {
-      await _generateBaselineFile(finalResult, localIgnoreFile, skillDir, skillDir);
-    }
 
     if (!generateBaseline) {
       final String fullPath = p.absolute(skillDir.path);
@@ -352,8 +439,25 @@ Future<bool> validateSkillsInternal({
       }
     }
   }
+  return (globalAnyFailed: globalAnyFailed, anySkillsValidated: anySkillsValidated);
+}
 
-  // 2. Process --skills-directory (-d) roots
+Future<({bool globalAnyFailed, bool anySkillsValidated})> _processSkillDirectories({
+  required List<String> skillDirPaths,
+  required bool quiet,
+  required Configuration config,
+  required Map<String, AnalysisSeverity> resolvedRules,
+  required String? ignoreFileOverride,
+  required List<SkillRule> customRules,
+  required bool printWarnings,
+  required bool generateBaseline,
+  required bool fix,
+  required bool fixApply,
+  required bool fastFail,
+}) async {
+  var globalAnyFailed = false;
+  var anySkillsValidated = false;
+
   for (final rootPath in skillDirPaths) {
     final String normalizedRootPath = p.normalize(_expandPath(rootPath));
     if (!quiet) {
@@ -399,27 +503,18 @@ Future<bool> validateSkillsInternal({
           continue;
         }
         anySkillsValidated = true;
-        final ValidationResult result = await _validateSingleSkill(
+        final ValidationResult finalResult = await _runValidationWorkflow(
           skillDir: entity,
           validator: validator,
           ignoresMap: ignoresMap,
           printWarnings: printWarnings,
           quiet: quiet,
-        );
-
-        final ValidationResult finalResult = await _applyFixesIfNeeded(
-          skillDir: entity,
-          result: result,
-          validator: validator,
-          skillIgnores: ignoresMap[p.basename(entity.path)] ?? [],
+          generateBaseline: generateBaseline,
           fix: fix,
           fixApply: fixApply,
-          quiet: quiet,
+          localIgnoreFile: localIgnoreFile,
+          baselineRootDir: rootDir,
         );
-
-        if (generateBaseline) {
-          await _generateBaselineFile(finalResult, localIgnoreFile, rootDir, entity);
-        }
 
         if (!finalResult.isValid) {
           globalAnyFailed = true;
@@ -448,30 +543,7 @@ Future<bool> validateSkillsInternal({
       break;
     }
   }
-
-  if (!anySkillsValidated) {
-    var foundSingleSkillPassedToD = false;
-    for (final rootPath in skillDirPaths) {
-      final String expandedRootPath = _expandPath(rootPath);
-      final skillMdFile = File(p.join(expandedRootPath, SkillContext.skillFileName));
-      if (skillMdFile.existsSync()) {
-        _log.severe(
-          'Directory "$expandedRootPath" appears to be an individual skill. Use --skill / -s instead of -d / --skills-directory.',
-        );
-        foundSingleSkillPassedToD = true;
-      }
-    }
-    if (!foundSingleSkillPassedToD) {
-      _log.severe('No skills found to validate in the specified directories.');
-    }
-    globalAnyFailed = true;
-  }
-
-  if (generateBaseline) {
-    globalAnyFailed = false;
-  }
-
-  return !globalAnyFailed;
+  return (globalAnyFailed: globalAnyFailed, anySkillsValidated: anySkillsValidated);
 }
 
 @visibleForTesting
@@ -569,7 +641,7 @@ Future<Map<String, List<IgnoreEntry>>> _loadIgnores(
   return {};
 }
 
-void _applyIgnores(ValidationResult result, List<IgnoreEntry> ignores, Directory skillDir) {
+void _applyIgnores(ValidationResult result, List<IgnoreEntry> ignores) {
   for (final ValidationError error in result.validationErrors) {
     if (error.isIgnored) {
       continue;
@@ -598,7 +670,7 @@ Future<ValidationResult> _validateSingleSkill({
   }
   final ValidationResult result = await validator.validate(skillDir);
   final List<IgnoreEntry> skillIgnores = ignoresMap[skillName] ?? [];
-  _applyIgnores(result, skillIgnores, skillDir);
+  _applyIgnores(result, skillIgnores);
   _printValidationResult(result, printWarnings, quiet);
   return result;
 }
@@ -638,7 +710,7 @@ Future<ValidationResult> _applyFixesIfNeeded({
       );
       if (hasErrors) {
         try {
-          final String newContent = await (rule as FixableRule).fix(
+          final String newContent = await rule.fix(
             SkillContext.skillFileName,
             currentContent,
             context.directory,
@@ -661,7 +733,7 @@ Future<ValidationResult> _applyFixesIfNeeded({
         _log.info('  Applied fixes for $skillName');
       }
       final ValidationResult newResult = await validator.validate(skillDir);
-      _applyIgnores(newResult, skillIgnores, skillDir);
+      _applyIgnores(newResult, skillIgnores);
       return newResult;
     } else if (fix) {
       if (!quiet) {
@@ -672,6 +744,49 @@ Future<ValidationResult> _applyFixesIfNeeded({
   }
 
   return result;
+}
+
+/// Validates a single skill, applies fixes if requested, and generates a baseline if requested.
+///
+/// Returns the [ValidationResult] after fixes are applied.
+Future<ValidationResult> _runValidationWorkflow({
+  required Directory skillDir,
+  required Validator validator,
+  required Map<String, List<IgnoreEntry>> ignoresMap,
+  required bool printWarnings,
+  required bool quiet,
+  required bool generateBaseline,
+  required bool fix,
+  required bool fixApply,
+  required String? localIgnoreFile,
+  required Directory baselineRootDir,
+}) async {
+  final String skillName = p.basename(skillDir.path);
+  final List<IgnoreEntry> skillIgnores = ignoresMap[skillName] ?? [];
+
+  final ValidationResult result = await _validateSingleSkill(
+    skillDir: skillDir,
+    validator: validator,
+    ignoresMap: ignoresMap,
+    printWarnings: printWarnings,
+    quiet: quiet,
+  );
+
+  final ValidationResult finalResult = await _applyFixesIfNeeded(
+    skillDir: skillDir,
+    result: result,
+    validator: validator,
+    skillIgnores: skillIgnores,
+    fix: fix,
+    fixApply: fixApply,
+    quiet: quiet,
+  );
+
+  if (generateBaseline) {
+    await _generateBaselineFile(finalResult, localIgnoreFile, baselineRootDir, skillDir);
+  }
+
+  return finalResult;
 }
 
 /// Prints a simple line-by-line diff between [original] and [modified].
