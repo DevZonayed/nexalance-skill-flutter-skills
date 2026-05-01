@@ -6,7 +6,6 @@ import 'models/analysis_severity.dart';
 import 'models/check_type.dart';
 import 'models/skill_rule.dart';
 import 'rules/absolute_paths_rule.dart';
-import 'rules/check_dart_code_blocks_rule.dart';
 import 'rules/description_length_rule.dart';
 import 'rules/disallowed_field_rule.dart';
 import 'rules/name_format_rule.dart';
@@ -54,11 +53,6 @@ class RuleRegistry {
       defaultSeverity: ValidYamlMetadataRule.defaultSeverity,
       help: 'Check if YAML metadata is valid.',
     ),
-    const CheckType(
-      name: CheckDartCodeBlocksRule.ruleName,
-      defaultSeverity: CheckDartCodeBlocksRule.defaultSeverity,
-      help: 'Check if Dart code blocks are valid.',
-    ),
   ];
 
   /// Creates a rule instance by name, or returns null if not a class-based rule.
@@ -78,8 +72,6 @@ class RuleRegistry {
         return TrailingWhitespaceRule(severity: severity);
       case ValidYamlMetadataRule.ruleName:
         return ValidYamlMetadataRule(severity: severity);
-      case CheckDartCodeBlocksRule.ruleName:
-        return CheckDartCodeBlocksRule(severity: severity);
       default:
         return null;
     }
