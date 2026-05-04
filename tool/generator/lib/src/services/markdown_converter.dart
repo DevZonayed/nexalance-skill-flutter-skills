@@ -141,48 +141,48 @@ class MarkdownConverter {
     // 2. Find rows (tr)
     // 3. Construct markdown table
 
-    final rows = table.querySelectorAll('tr');
-    if (rows.isEmpty) return '';
-
     final buffer = StringBuffer('\n');
     var headerCells = <Element>[];
     final bodyRows = <Element>[];
 
-    // Try to find thead
-    final thead = table.querySelector('thead');
-    if (thead != null) {
-      final headerRow = thead.querySelector('tr');
-      if (headerRow != null) {
-        headerCells = headerRow.querySelectorAll('th');
+    final theads = table.children.where((e) => e.localName == 'thead').toList();
+    if (theads.isNotEmpty) {
+      final headerRows = theads.first.children
+          .where((e) => e.localName == 'tr')
+          .toList();
+      if (headerRows.isNotEmpty) {
+        final headerRow = headerRows.first;
+        headerCells = headerRow.children
+            .where((e) => e.localName == 'th')
+            .toList();
         if (headerCells.isEmpty) {
-          headerCells = headerRow.querySelectorAll('td');
+          headerCells = headerRow.children
+              .where((e) => e.localName == 'td')
+              .toList();
         }
       }
     }
 
-    // Try to find tbody
-    final tbody = table.querySelector('tbody');
-    if (tbody != null) {
-      bodyRows.addAll(tbody.querySelectorAll('tr'));
-    } else {
-      // No tbody, check direct children
-      final allRows = table.querySelectorAll('tr');
-      for (final row in allRows) {
-        if (thead != null && thead.contains(row)) continue;
-        if (!bodyRows.contains(row)) {
-          bodyRows.add(row);
-        }
+    for (final child in table.children) {
+      if (child.localName == 'tbody' || child.localName == 'tfoot') {
+        bodyRows.addAll(child.children.where((e) => e.localName == 'tr'));
+      } else if (child.localName == 'tr') {
+        bodyRows.add(child);
       }
     }
 
     // Promote first row to header if needed
     if (headerCells.isEmpty && bodyRows.isNotEmpty) {
       final firstRow = bodyRows.first;
-      headerCells = firstRow.querySelectorAll('th');
+      headerCells = firstRow.children
+          .where((e) => e.localName == 'th')
+          .toList();
       if (headerCells.isEmpty) {
-        headerCells = firstRow.querySelectorAll('td');
+        headerCells = firstRow.children
+            .where((e) => e.localName == 'td')
+            .toList();
       }
-      if (bodyRows.isNotEmpty) bodyRows.removeAt(0);
+      bodyRows.removeAt(0);
     }
 
     if (headerCells.isEmpty && bodyRows.isEmpty) return '';
