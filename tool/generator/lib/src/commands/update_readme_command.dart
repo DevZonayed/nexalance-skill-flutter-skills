@@ -65,7 +65,10 @@ class UpdateReadmeCommand extends BaseYamlCommand {
 
     // Parse existing example prompts from the README if they exist
     final existingPrompts = <String, String>{};
-    final tableLineRegex = RegExp(r'^\| \[([^\]]+)\]\([^)]+\) \| [^|]+ \| ([^|]+) \|', multiLine: true);
+    final tableLineRegex = RegExp(
+      r'^\| \[([^\]]+)\]\([^)]+\) \| [^|]+ \| ([^|]+) \|',
+      multiLine: true,
+    );
     for (final match in tableLineRegex.allMatches(content)) {
       final skillName = match.group(1)!;
       final prompt = match.group(2)!.trim();
