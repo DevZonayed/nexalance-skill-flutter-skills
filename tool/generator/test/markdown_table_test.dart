@@ -83,5 +83,49 @@ void main() {
       expect(markdown, contains('Details content'));
       expect(markdown, contains('</details>'));
     });
+    test('converts nested tables without flattening', () {
+      const html = '''
+<table>
+  <tr>
+    <td>Outer 1</td>
+    <td>
+      <table>
+        <tr><td>Inner 1</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+''';
+      final markdown = converter.convert(html);
+      // Outer row should contain both outer text and inner table result.
+      expect(markdown, contains('| Outer 1 |'));
+      expect(markdown, contains('| Inner 1 |'));
+      // The outer table should not have inner cells as separate columns of the outer structure.
+    });
+    test('handles empty table gracefully', () {
+      const html = '<table></table>';
+      final markdown = converter.convert(html);
+      expect(markdown, isEmpty);
+    });
+
+    test('converts table with multiple tbodies', () {
+      const html = '''
+<table>
+  <thead>
+    <tr><th>Header</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Row 1</td></tr>
+  </tbody>
+  <tbody>
+    <tr><td>Row 2</td></tr>
+  </tbody>
+</table>
+''';
+      final markdown = converter.convert(html);
+      expect(markdown, contains('| Header |'));
+      expect(markdown, contains('| Row 1 |'));
+      expect(markdown, contains('| Row 2 |'));
+    });
   });
 }
